@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Vis",
+  "version": "0.0.1",
+  "identifier": "dev.xenodrive.vis",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "pnpm build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Vis — OpenCode Visualizer",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 900,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "center": true,
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self' tauri://localhost https://tauri.localhost; script-src 'self' 'unsafe-eval' 'wasm-unsafe-eval' tauri://localhost https://tauri.localhost; style-src 'self' 'unsafe-inline' tauri://localhost https://tauri.localhost; img-src 'self' data: blob: tauri://localhost https://tauri.localhost; font-src 'self' data: tauri://localhost https://tauri.localhost; connect-src 'self' http://127.0.0.1:* ws://127.0.0.1:* http://localhost:* ws://localhost:* ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["appimage", "deb"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png"
+    ],
+    "category": "DeveloperTool",
+    "copyright": "MIT",
+    "shortDescription": "Beautiful OpenCode UI",
+    "longDescription": "Desktop shell for the Vis OpenCode Visualizer — a beautiful Vue 3 UI for the OpenCode agent."
+  }
+}

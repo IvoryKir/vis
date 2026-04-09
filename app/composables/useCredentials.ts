@@ -27,14 +27,26 @@ const launcherManaged = ref(false);
  * login screen entirely — the API is reachable on the same origin and
  * needs no CORS configuration or hand-typed URL.
  */
-function readApiBaseMeta(): string | null {
-  if (typeof document === 'undefined') return null;
+function readApiBase(): string | null {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return null;
+  // 1. Direct window global (set by the Tauri shell via window.eval on boot).
+  //    Checked first because the Tauri shell can set it before the meta tag
+  //    exists, and we'd rather pick up the eventual URL over stale HTML.
+  const direct = (window as unknown as { __VIS_API_BASE__?: unknown }).__VIS_API_BASE__;
+  if (typeof direct === 'string' && direct.trim()) {
+    return resolveBase(direct.trim());
+  }
+  // 2. <meta name="vis-api-base" content="..."> injected either by the Node
+  //    launcher (server.js rewriting dist/index.html on serve) or hand-written.
   const meta = document.querySelector('meta[name="vis-api-base"]');
-  if (!meta) return null;
-  const content = meta.getAttribute('content')?.trim();
-  if (!content) return null;
-  // Resolve relative paths against the current origin so the SDK gets a
-  // fully-qualified URL it can use for both fetch and `replace(/^http/, 'ws')`.
+  if (meta) {
+    const content = meta.getAttribute('content')?.trim();
+    if (content) return resolveBase(content);
+  }
+  return null;
+}
+
+function resolveBase(content: string): string | null {
   try {
     return new URL(content, window.location.origin).toString().replace(/\/+$/, '');
   } catch {
@@ -43,7 +55,11 @@ function readApiBaseMeta(): string | null {
 }
 
 export function useCredentials() {
-  const launcherBaseUrl = readApiBaseMeta();
+  // Pick up the launcher-provided base URL if present. Under the Tauri shell
+  // this value may not exist yet at first call (the shell injects it via
+  // window.eval only after opencode has finished booting) — we also subscribe
+  // to the 'vis:api-base-changed' event below to catch that late update.
+  const launcherBaseUrl = readApiBase();
   if (launcherBaseUrl && !launcherManaged.value) {
     url.value = launcherBaseUrl;
     launcherManaged.value = true;
@@ -171,6 +187,18 @@ export function useCredentials() {
       } catch {
         return;
       }
+    });
+  }
+
+  // Late injection support: the Tauri shell waits until opencode is up
+  // before writing window.__VIS_API_BASE__ and firing this event. If the
+  // SPA booted first with an empty meta tag, we latch on when it arrives.
+  if (typeof window !== 'undefined') {
+    window.addEventListener('vis:api-base-changed', () => {
+      const late = readApiBase();
+      if (!late) return;
+      url.value = late;
+      launcherManaged.value = true;
     });
   }
 

@@ -5326,12 +5326,29 @@ onMounted(() => {
   }
   credentials.load();
 
+  // Detect the Tauri shell so we can wait for its late API-base injection
+  // instead of flashing the login form while opencode is still booting.
+  const isTauriShell =
+    typeof window !== 'undefined' &&
+    ('__TAURI_INTERNALS__' in window || '__TAURI__' in window);
+
   if (credentials.isConfigured.value) {
     loginUrl.value = credentials.url.value;
     loginUsername.value = credentials.username.value;
     loginPassword.value = credentials.password.value;
     loginRequiresAuth.value = !!(credentials.username.value || credentials.password.value);
     void startInitialization();
+  } else if (isTauriShell) {
+    // The Tauri shell spawns opencode and injects the URL via window.eval
+    // once it's up. Show a loading screen until that happens.
+    uiInitState.value = 'loading';
+    initLoadingMessage.value = 'Starting OpenCode...';
+    const onApiBaseReady = () => {
+      if (!credentials.isConfigured.value) return;
+      window.removeEventListener('vis:api-base-changed', onApiBaseReady);
+      void startInitialization();
+    };
+    window.addEventListener('vis:api-base-changed', onApiBaseReady);
   } else {
     uiInitState.value = 'login';
     const savedError = storageGet(StorageKeys.state.lastAuthError);
