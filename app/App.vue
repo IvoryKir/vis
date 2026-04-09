@@ -195,7 +195,9 @@
           </div>
         </div>
         <div v-if="uiInitState === 'login'" class="app-login-form">
-          <p class="app-loading-title">Connect to OpenCode Server</p>
+          <p class="app-loading-title">
+            {{ launcherManaged ? 'Sign in to OpenCode' : 'Connect to OpenCode Server' }}
+          </p>
           <div class="app-login-fields">
             <input
               v-model="loginUsername"
@@ -219,6 +221,7 @@
               The server requires authentication
             </label>
             <input
+              v-if="!launcherManaged"
               v-model="loginUrl"
               type="text"
               class="app-login-input"
@@ -365,6 +368,7 @@ import {
 } from './utils/storageKeys';
 
 const credentials = useCredentials();
+const launcherManaged = credentials.launcherManaged;
 const { suppressAutoWindows } = useSettings();
 const FOLLOW_THRESHOLD_PX = 24;
 const FILE_VIEWER_WINDOW_WIDTH = 840;

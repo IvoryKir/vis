@@ -16,8 +16,39 @@ type Credentials = {
 const url = ref('');
 const username = ref('');
 const password = ref('');
+const launcherManaged = ref(false);
+
+/**
+ * Read the same-origin API base injected by the Vis launcher (`server.js`).
+ *
+ * The launcher rewrites the served `index.html` to set
+ * `<meta name="vis-api-base" content="/api" />`. When that meta tag is
+ * non-empty we know we are running under the launcher and can skip the
+ * login screen entirely — the API is reachable on the same origin and
+ * needs no CORS configuration or hand-typed URL.
+ */
+function readApiBaseMeta(): string | null {
+  if (typeof document === 'undefined') return null;
+  const meta = document.querySelector('meta[name="vis-api-base"]');
+  if (!meta) return null;
+  const content = meta.getAttribute('content')?.trim();
+  if (!content) return null;
+  // Resolve relative paths against the current origin so the SDK gets a
+  // fully-qualified URL it can use for both fetch and `replace(/^http/, 'ws')`.
+  try {
+    return new URL(content, window.location.origin).toString().replace(/\/+$/, '');
+  } catch {
+    return null;
+  }
+}
 
 export function useCredentials() {
+  const launcherBaseUrl = readApiBaseMeta();
+  if (launcherBaseUrl && !launcherManaged.value) {
+    url.value = launcherBaseUrl;
+    launcherManaged.value = true;
+  }
+
   const authHeader = computed(() => {
     const u = username.value.trim();
     const p = password.value.trim();
@@ -35,6 +66,23 @@ export function useCredentials() {
   });
 
   function save(newUrl: string, newUsername: string, newPassword: string) {
+    // When the launcher injected an API base, ignore manual URL overrides
+    // — the user shouldn't be allowed to point Vis at a different server.
+    if (launcherManaged.value) {
+      username.value = newUsername;
+      password.value = newPassword;
+      // Persist credentials only (not URL) so refreshes keep auth.
+      if (typeof window !== 'undefined') {
+        try {
+          const data: Credentials = { url: '', username: newUsername, password: newPassword };
+          storageSet(StorageKeys.auth.credentials, JSON.stringify(data));
+        } catch {
+          /* ignore */
+        }
+      }
+      return;
+    }
+
     url.value = newUrl;
     username.value = newUsername;
     password.value = newPassword;
@@ -68,7 +116,10 @@ export function useCredentials() {
       const loadedUsername = typeof record.username === 'string' ? record.username : '';
       const loadedPassword = typeof record.password === 'string' ? record.password : '';
 
-      url.value = loadedUrl;
+      // Under the launcher we keep the injected URL and only restore auth.
+      if (!launcherManaged.value) {
+        url.value = loadedUrl;
+      }
       username.value = loadedUsername;
       password.value = loadedPassword;
     } catch {
@@ -77,7 +128,11 @@ export function useCredentials() {
   }
 
   function clear() {
-    url.value = '';
+    // Under the launcher we never wipe the URL — the meta tag is the source
+    // of truth and a logout simply forgets HTTP auth.
+    if (!launcherManaged.value) {
+      url.value = '';
+    }
     username.value = '';
     password.value = '';
 
@@ -126,6 +181,7 @@ export function useCredentials() {
     authHeader,
     baseUrl,
     isConfigured,
+    launcherManaged,
     save,
     load,
     clear,
