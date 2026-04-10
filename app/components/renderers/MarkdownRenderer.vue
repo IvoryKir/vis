@@ -188,8 +188,8 @@ onBeforeUnmount(() => {
 }
 
 .message-content :deep(.grep-match) {
-  color: #fef08a;
-  background: rgba(234, 179, 8, 0.3);
+  color: var(--color-warning-light);
+  background: color-mix(in srgb, var(--color-warning) 30%, transparent);
   border-radius: 2px;
   padding: 0 0.08em;
   font-weight: 700;
@@ -280,7 +280,7 @@ onBeforeUnmount(() => {
   content: counter(md-ol) '.';
   position: absolute;
   left: -1.4em;
-  color: #60a5fa;
+  color: var(--accent-primary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -294,7 +294,7 @@ onBeforeUnmount(() => {
   content: '-';
   position: absolute;
   left: 0;
-  color: #60a5fa;
+  color: var(--accent-primary);
 }
 
 .message-content :deep(.markdown-host li + li) {
@@ -304,21 +304,21 @@ onBeforeUnmount(() => {
 .message-content :deep(.markdown-host blockquote) {
   margin: 0.2em 0;
   padding-left: 0.7em;
-  border-left: 2px solid rgba(148, 163, 184, 0.5);
-  color: rgba(226, 232, 240, 0.85);
-  background: rgba(15, 23, 42, 0.35);
+  border-left: 2px solid color-mix(in srgb, var(--text-muted) 50%, transparent);
+  color: color-mix(in srgb, var(--text-primary) 85%, transparent);
+  background: color-mix(in srgb, var(--bg-surface-2) 35%, transparent);
   border-radius: 0 4px 4px 0;
 }
 
 .message-content :deep(.markdown-host a) {
-  color: #7dd3fc;
+  color: var(--color-info);
   text-decoration: underline;
-  text-decoration-color: rgba(125, 211, 252, 0.55);
+  text-decoration-color: color-mix(in srgb, var(--color-info) 55%, transparent);
   text-underline-offset: 2px;
 }
 
 .message-content :deep(.markdown-host a:hover) {
-  text-decoration-color: #7dd3fc;
+  text-decoration-color: var(--color-info);
 }
 
 .message-content :deep(.markdown-host strong) {
@@ -331,7 +331,7 @@ onBeforeUnmount(() => {
 
 .message-content :deep(.markdown-host hr) {
   border: 0;
-  border-top: 1px solid rgba(148, 163, 184, 0.35);
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 35%, transparent);
   margin: 0.3em 0;
 }
 
@@ -346,17 +346,17 @@ onBeforeUnmount(() => {
 
 .message-content :deep(.markdown-host th),
 .message-content :deep(.markdown-host td) {
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 30%, transparent);
   padding: 0.2em 0.55em;
 }
 
 .message-content :deep(.markdown-host th) {
   font-weight: 600;
-  background: rgba(51, 65, 85, 0.35);
+  background: color-mix(in srgb, var(--border-color) 35%, transparent);
 }
 
 .message-content :deep(.markdown-host tr:nth-child(even)) {
-  background: rgba(51, 65, 85, 0.12);
+  background: color-mix(in srgb, var(--border-color) 12%, transparent);
 }
 
 .message-content :deep(.markdown-host img) {
@@ -381,8 +381,8 @@ onBeforeUnmount(() => {
   margin: 0.5em 0.25em;
   padding: 0.45em 0.6em;
   border-radius: 6px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: color-mix(in srgb, var(--bg-surface-2) 50%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 18%, transparent);
   overflow-x: auto;
 }
 
@@ -403,10 +403,10 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 0.75em;
   right: 0.75em;
-  border: 1px solid rgba(148, 163, 184, 0.36);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 36%, transparent);
   border-radius: 5px;
-  background: rgba(15, 23, 42, 0.86);
-  color: #94a3b8;
+  background: color-mix(in srgb, var(--bg-surface-2) 86%, transparent);
+  color: var(--text-muted);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -439,9 +439,9 @@ onBeforeUnmount(() => {
 }
 
 .message-content :deep(.markdown-host .md-copy-btn:hover) {
-  color: #e2e8f0;
-  border-color: rgba(148, 163, 184, 0.6);
-  background: rgba(30, 41, 59, 0.92);
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--text-muted) 60%, transparent);
+  background: color-mix(in srgb, var(--bg-surface-4) 92%, transparent);
 }
 
 .message-content :deep(.markdown-host .md-copied-indicator) {
@@ -450,8 +450,8 @@ onBeforeUnmount(() => {
   right: 0.75em;
   border: 1px solid rgba(34, 197, 94, 0.55);
   border-radius: 5px;
-  background: rgba(15, 23, 42, 0.86);
-  color: #22c55e;
+  background: color-mix(in srgb, var(--bg-surface-2) 86%, transparent);
+  color: var(--color-success-dark);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.02em;

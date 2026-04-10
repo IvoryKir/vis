@@ -222,15 +222,15 @@ function toolStatusLabel(part: ToolPart): string {
 function toolHeaderColor(tool: string): string {
   switch (tool) {
     case 'bash':
-      return '#a855f7';
+      return 'var(--color-purple)';
     case 'edit':
     case 'multiedit':
     case 'apply_patch':
-      return '#f97316';
+      return 'var(--color-orange)';
     case 'write':
-      return '#f97316';
+      return 'var(--color-orange)';
     default:
-      return '#64748b';
+      return 'var(--text-faint)';
   }
 }
 
@@ -259,26 +259,26 @@ function formatMessageTime(value?: number) {
 }
 
 .history-item {
-  border: 1px solid #334155;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #020617;
+  background: var(--bg-surface-0);
 }
 
 .history-meta {
   padding: 6px 10px;
-  background: color-mix(in srgb, #60a5fa 12%, #0f172a);
-  border-bottom: 1px solid #1e293b;
+  background: color-mix(in srgb, var(--accent-primary) 12%, var(--bg-surface-2));
+  border: 1px solid var(--border-faint);
   border-radius: 7px 7px 0 0;
   display: flex;
   gap: 8px;
   align-items: center;
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .history-index {
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .history-time {
@@ -287,9 +287,9 @@ function formatMessageTime(value?: number) {
 
 .history-agent {
   padding: 2px 6px;
-  background: #1e293b;
+  background: var(--bg-surface-4);
   border-radius: 4px;
-  color: #cbd5e1;
+  color: var(--text-secondary);
 }
 
 .history-content-wrapper {
@@ -300,19 +300,19 @@ function formatMessageTime(value?: number) {
 
 .history-item-reasoning {
   cursor: pointer;
-  border-color: color-mix(in srgb, #8b5cf6 40%, #1e293b);
+  border: 1px solid var(--border-faint));
   transition:
     border-color 0.15s,
     background 0.15s;
 }
 
 .history-item-reasoning:hover {
-  border-color: color-mix(in srgb, #8b5cf6 60%, #1e293b);
-  background: color-mix(in srgb, #8b5cf6 6%, #020617);
+  border: 1px solid var(--border-faint));
+  background: color-mix(in srgb, var(--color-purple) 6%, var(--bg-surface-0));
 }
 
 .history-item-reasoning .history-meta {
-  background: color-mix(in srgb, #8b5cf6 18%, rgba(15, 23, 42, 0.95));
+  background: color-mix(in srgb, var(--color-purple) 18%, color-mix(in srgb, var(--bg-surface-2) 95%, transparent));
   border-bottom: none;
 }
 
@@ -328,12 +328,12 @@ function formatMessageTime(value?: number) {
 
 /* Question entry */
 .history-item-question {
-  border-color: color-mix(in srgb, #34d399 40%, #1e293b);
+  border: 1px solid var(--border-faint));
 }
 
 .history-meta-question {
-  background: color-mix(in srgb, #34d399 18%, rgba(15, 23, 42, 0.95));
-  border-bottom-color: color-mix(in srgb, #34d399 25%, #1e293b);
+  background: color-mix(in srgb, var(--color-success) 18%, color-mix(in srgb, var(--bg-surface-2) 95%, transparent));
+  border: 1px solid var(--border-faint));
 }
 
 .history-question-badge {
@@ -343,24 +343,24 @@ function formatMessageTime(value?: number) {
   font-weight: 700;
   letter-spacing: 0.5px;
   background: rgba(6, 78, 59, 0.6);
-  color: #6ee7b7;
+  color: var(--color-success);
 }
 
 .history-question-status {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .history-question-status.is-replied {
-  color: #4ade80;
+  color: var(--color-success);
 }
 
 .history-question-status.is-rejected {
-  color: #f87171;
+  color: var(--color-error);
 }
 
 .history-question-status.is-pending {
-  color: #fbbf24;
+  color: var(--color-warning-light);
 }
 
 .history-question-body {
@@ -379,7 +379,7 @@ function formatMessageTime(value?: number) {
 .history-question-header {
   font-size: 11px;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
@@ -387,7 +387,7 @@ function formatMessageTime(value?: number) {
 .history-question-text {
   font-size: 13px;
   line-height: 1.4;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .history-question-options {
@@ -403,14 +403,14 @@ function formatMessageTime(value?: number) {
   align-items: baseline;
   font-size: 12px;
   line-height: 1.4;
-  color: #94a3b8;
+  color: var(--text-muted);
   padding: 2px 4px;
   border-radius: 3px;
 }
 
 .history-question-option.is-selected {
-  color: #e2e8f0;
-  background: rgba(52, 211, 153, 0.1);
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--color-success) 10%, transparent);
 }
 
 .option-check {
@@ -423,40 +423,40 @@ function formatMessageTime(value?: number) {
 }
 
 .option-desc {
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .history-question-option.is-selected .option-desc {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .history-question-custom {
   margin-top: 4px;
   padding: 4px 8px;
-  background: rgba(52, 211, 153, 0.08);
-  border-left: 2px solid #34d399;
+  background: color-mix(in srgb, var(--color-success) 8%, transparent);
+  border-left: 2px solid var(--color-success);
   border-radius: 2px;
   font-size: 12px;
   line-height: 1.4;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .history-item-tool {
   cursor: pointer;
-  border-color: color-mix(in srgb, var(--tool-color, #64748b) 40%, #1e293b);
+  border: 1px solid var(--border-faint));
   transition:
     border-color 0.15s,
     background 0.15s;
 }
 
 .history-item-tool:hover {
-  border-color: color-mix(in srgb, var(--tool-color, #64748b) 60%, #1e293b);
-  background: color-mix(in srgb, var(--tool-color, #64748b) 6%, #020617);
+  border: 1px solid var(--border-faint));
+  background: color-mix(in srgb, var(--tool-color, var(--text-faint)) 6%, var(--bg-surface-0));
 }
 
 .history-item-tool .history-meta {
-  background: color-mix(in srgb, var(--tool-color, #64748b) 18%, rgba(15, 23, 42, 0.95));
-  border-bottom-color: color-mix(in srgb, var(--tool-color, #64748b) 25%, #1e293b);
+  background: color-mix(in srgb, var(--tool-color, var(--text-faint)) 18%, color-mix(in srgb, var(--bg-surface-2) 95%, transparent));
+  border: 1px solid var(--border-faint));
 }
 
 .history-tool-badge {
@@ -465,8 +465,8 @@ function formatMessageTime(value?: number) {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #e2e8f0;
-  background: #334155;
+  color: var(--text-primary);
+  background: var(--bg-surface-5);
 }
 
 .history-tool-badge.history-tool-bash {
@@ -481,30 +481,30 @@ function formatMessageTime(value?: number) {
 
 .history-tool-badge.history-tool-edit,
 .history-tool-badge.history-tool-multiedit {
-  background: rgba(30, 58, 138, 0.5);
-  color: #bfdbfe;
+  background: color-mix(in srgb, var(--accent-dark) 50%, transparent);
+  color: var(--color-info);
 }
 
 .history-tool-badge.history-tool-apply_patch {
-  background: rgba(30, 58, 138, 0.5);
-  color: #bfdbfe;
+  background: color-mix(in srgb, var(--accent-dark) 50%, transparent);
+  color: var(--color-info);
 }
 
 .history-tool-status {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .history-tool-status.is-completed {
-  color: #4ade80;
+  color: var(--color-success);
 }
 
 .history-tool-status.is-error {
-  color: #f87171;
+  color: var(--color-error);
 }
 
 .history-tool-status.is-running {
-  color: #fbbf24;
+  color: var(--color-warning-light);
 }
 
 .history-tool-content {
@@ -512,7 +512,7 @@ function formatMessageTime(value?: number) {
   font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
   font-size: 12px;
   line-height: 1.4;
-  color: #94a3b8;
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

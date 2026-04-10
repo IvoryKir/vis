@@ -124,7 +124,7 @@ function basename(filepath: string) {
 .viewer-tab {
   border: 0;
   background: transparent;
-  color: #8a8f9a;
+  color: var(--text-muted);
   font-size: 11px;
   font-family: inherit;
   padding: 3px 10px;
@@ -137,12 +137,12 @@ function basename(filepath: string) {
 }
 
 .viewer-tab:hover {
-  color: #cbd5e1;
+  color: var(--text-secondary);
 }
 
 .viewer-tab.active {
-  color: #e2e8f0;
-  border-bottom-color: #60a5fa;
+  color: var(--text-primary);
+  border-bottom-color: var(--accent-primary);
 }
 
 .viewer-body {
@@ -156,7 +156,7 @@ function basename(filepath: string) {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #64748b;
+  color: var(--text-faint);
   font-size: 13px;
   user-select: none;
 }

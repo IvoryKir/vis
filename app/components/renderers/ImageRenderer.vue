@@ -109,7 +109,7 @@ function handleLoad() {
   height: 100%;
   overflow: hidden;
   position: relative;
-  background: #0f172a;
+  background: var(--bg-surface-2);
   cursor: grab;
   display: flex;
   align-items: center;
@@ -142,7 +142,7 @@ function handleLoad() {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #f87171;
+  color: var(--color-error);
   background: rgba(0, 0, 0, 0.7);
   padding: 8px 16px;
   border-radius: 4px;

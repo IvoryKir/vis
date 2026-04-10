@@ -39,6 +39,6 @@ defineProps<{
 }
 
 .bash-empty {
-  color: #64748b;
+  color: var(--text-faint);
 }
 </style>

@@ -279,7 +279,7 @@ function emitReject() {
   min-height: 0;
   padding: 8px;
   box-sizing: border-box;
-  color: #d1fae5;
+  color: var(--color-success);
   font-size: 12px;
 }
 
@@ -297,7 +297,7 @@ function emitReject() {
 
 .question-type {
   font-size: 11px;
-  color: #86efac;
+  color: var(--color-success);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -306,7 +306,7 @@ function emitReject() {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border: 1px solid rgba(52, 211, 153, 0.25);
+  border: 1px solid color-mix(in srgb, var(--color-success) 25%, transparent);
   border-radius: 8px;
   padding: 6px 8px;
   background: rgba(2, 44, 34, 0.35);
@@ -320,19 +320,19 @@ function emitReject() {
 }
 
 .question-label {
-  color: #6ee7b7;
+  color: var(--color-success);
   font-size: 11px;
 }
 
 .question-value {
-  color: #d1fae5;
+  color: var(--color-success);
   font-size: 11px;
   word-break: break-all;
 }
 
 .divider {
   margin: 0 4px;
-  color: #34d399;
+  color: var(--color-success);
 }
 
 .question-body {
@@ -345,7 +345,7 @@ function emitReject() {
 }
 
 .context-text-area {
-  border: 1px solid rgba(52, 211, 153, 0.2);
+  border: 1px solid color-mix(in srgb, var(--color-success) 20%, transparent);
   border-radius: 8px;
   padding: 8px;
   background: rgba(6, 24, 18, 0.4);
@@ -357,7 +357,7 @@ function emitReject() {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border: 1px solid rgba(52, 211, 153, 0.25);
+  border: 1px solid color-mix(in srgb, var(--color-success) 25%, transparent);
   border-radius: 8px;
   padding: 8px;
   background: rgba(6, 24, 18, 0.55);
@@ -371,20 +371,20 @@ function emitReject() {
 }
 
 .section-title {
-  color: #a7f3d0;
+  color: var(--color-success);
   font-size: 12px;
   font-weight: 700;
 }
 
 .section-mode {
-  color: #6ee7b7;
+  color: var(--color-success);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .section-question {
-  color: #d1fae5;
+  color: var(--color-success);
   font-size: 11px;
   line-height: 1.35;
 }
@@ -397,9 +397,9 @@ function emitReject() {
 
 .option-item {
   border-radius: 8px;
-  border: 1px solid rgba(52, 211, 153, 0.28);
+  border: 1px solid color-mix(in srgb, var(--color-success) 28%, transparent);
   background: rgba(2, 44, 34, 0.3);
-  color: #d1fae5;
+  color: var(--color-success);
   padding: 6px 8px;
   text-align: left;
   display: flex;
@@ -425,7 +425,7 @@ function emitReject() {
 
 .option-description {
   font-size: 10px;
-  color: #86efac;
+  color: var(--color-success);
 }
 
 .custom-answer {
@@ -435,9 +435,9 @@ function emitReject() {
 .custom-input {
   width: 100%;
   border-radius: 8px;
-  border: 1px solid rgba(52, 211, 153, 0.35);
+  border: 1px solid color-mix(in srgb, var(--color-success) 35%, transparent);
   background: rgba(2, 44, 34, 0.55);
-  color: #d1fae5;
+  color: var(--color-success);
   font-size: 11px;
   padding: 6px 8px;
   min-height: 3em;
@@ -449,11 +449,11 @@ function emitReject() {
 }
 
 .custom-input:focus {
-  border-color: rgba(52, 211, 153, 0.6);
+  border-color: color-mix(in srgb, var(--color-success) 60%, transparent);
 }
 
 .question-error {
-  color: #fecaca;
+  color: var(--color-error-light);
   font-size: 11px;
 }
 
@@ -461,16 +461,16 @@ function emitReject() {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  border-top: 1px solid rgba(52, 211, 153, 0.3);
+  border-top: 1px solid color-mix(in srgb, var(--color-success) 30%, transparent);
   padding-top: 8px;
 }
 
 .question-button {
   border-radius: 8px;
   padding: 6px 10px;
-  border: 1px solid rgba(52, 211, 153, 0.45);
-  background: #042f2e;
-  color: #d1fae5;
+  border: 1px solid color-mix(in srgb, var(--color-success) 45%, transparent);
+  background: var(--bg-surface-3);
+  color: var(--color-success);
   font-size: 11px;
   cursor: pointer;
 }
@@ -486,7 +486,7 @@ function emitReject() {
 }
 
 .question-button.is-reply {
-  border-color: rgba(52, 211, 153, 0.7);
+  border-color: color-mix(in srgb, var(--color-success) 70%, transparent);
   background: rgba(16, 185, 129, 0.26);
 }
 </style>

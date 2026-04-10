@@ -126,7 +126,7 @@ const mergedProps = computed(() => ({
 .viewer-tab {
   border: 0;
   background: transparent;
-  color: #8a8f9a;
+  color: var(--text-muted);
   font-size: 11px;
   font-family: inherit;
   padding: 2px 8px;
@@ -136,11 +136,11 @@ const mergedProps = computed(() => ({
 }
 
 .viewer-tab:hover {
-  color: #cbd5e1;
+  color: var(--text-secondary);
 }
 
 .viewer-tab.active {
-  color: #e2e8f0;
-  border-bottom-color: #60a5fa;
+  color: var(--text-primary);
+  border-bottom-color: var(--accent-primary);
 }
 </style>

@@ -87,7 +87,7 @@ defineEmits<{
 
 .ib-footer-meta {
   font-size: 10px;
-  color: rgba(148, 163, 184, 0.7);
+  color: color-mix(in srgb, var(--text-muted) 70%, transparent);
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
@@ -116,7 +116,7 @@ defineEmits<{
 }
 
 .ib-ctx-low {
-  color: rgba(96, 165, 250, 0.7);
+  color: color-mix(in srgb, var(--accent-primary) 70%, transparent);
 }
 
 .ib-ctx-moderate {
@@ -138,10 +138,10 @@ defineEmits<{
 }
 
 .ib-action {
-  border: 1px solid rgba(148, 163, 184, 0.65);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 65%, transparent);
   border-radius: 6px;
-  background: rgba(15, 23, 42, 0.75);
-  color: #bfdbfe;
+  background: color-mix(in srgb, var(--bg-surface-2) 75%, transparent);
+  color: var(--color-info);
   font-size: 10px;
   line-height: 1;
   padding: 3px 7px;
@@ -150,13 +150,13 @@ defineEmits<{
 }
 
 .ib-action:hover {
-  background: rgba(30, 41, 59, 0.92);
+  background: color-mix(in srgb, var(--bg-surface-4) 92%, transparent);
 }
 
 .ib-action-diff {
-  border-color: rgba(96, 165, 250, 0.7);
-  background: rgba(30, 58, 138, 0.35);
-  color: #bfdbfe;
+  border-color: color-mix(in srgb, var(--accent-primary) 70%, transparent);
+  background: color-mix(in srgb, var(--accent-dark) 35%, transparent);
+  color: var(--color-info);
   font-weight: 600;
   letter-spacing: 0.5px;
 }
@@ -168,7 +168,7 @@ defineEmits<{
 .ib-action-danger {
   border-color: rgba(248, 113, 113, 0.7);
   background: rgba(127, 29, 29, 0.35);
-  color: #fecaca;
+  color: var(--color-error-light);
 }
 
 .ib-action-danger:hover {

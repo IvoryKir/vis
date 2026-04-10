@@ -130,7 +130,7 @@ const showLoading = computed(() => {
 }
 
 .code-renderer-content :deep(.code-row.line-highlight) {
-  background: rgba(148, 163, 184, 0.15);
+  background: color-mix(in srgb, var(--text-muted) 15%, transparent);
 }
 
 .viewer-loading {
@@ -138,7 +138,7 @@ const showLoading = computed(() => {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #64748b;
+  color: var(--text-faint);
   font-size: 13px;
   user-select: none;
 }

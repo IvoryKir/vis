@@ -74,25 +74,25 @@ function onMiddleClick(e: MouseEvent) {
   user-select: none;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
   /* Default state — matches .side-tab from SidePanel.vue */
-  background: rgba(15, 23, 42, 0.7);
-  border: 1px solid rgba(100, 116, 139, 0.35);
-  color: #94a3b8;
+  background: color-mix(in srgb, var(--bg-surface-2) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-faint) 35%, transparent);
+  color: var(--text-muted);
 }
 
 .session-tab:hover {
-  background: rgba(30, 41, 59, 0.92);
-  color: #cbd5e1;
+  background: color-mix(in srgb, var(--bg-surface-4) 92%, transparent);
+  color: var(--text-secondary);
 }
 
 .session-tab.is-active {
   background: rgba(30, 64, 175, 0.45);
-  border-color: rgba(96, 165, 250, 0.6);
-  color: #e2e8f0;
+  border-color: color-mix(in srgb, var(--accent-primary) 60%, transparent);
+  color: var(--text-primary);
 }
 
 .session-tab.is-error {
   border-color: rgba(248, 113, 113, 0.5);
-  color: #f87171;
+  color: var(--color-error);
 }
 
 .session-tab.is-error.is-active {
@@ -112,7 +112,7 @@ function onMiddleClick(e: MouseEvent) {
   width: 12px;
   height: 12px;
   border: 2px solid transparent;
-  border-top-color: #60a5fa;
+  border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: app-loading-spin 1s linear infinite;
   flex-shrink: 0;
@@ -124,7 +124,7 @@ function onMiddleClick(e: MouseEvent) {
   height: 14px;
   border-radius: 50%;
   background: rgba(248, 113, 113, 0.2);
-  color: #f87171;
+  color: var(--color-error);
   font-size: 10px;
   font-weight: 800;
   display: flex;
@@ -138,14 +138,14 @@ function onMiddleClick(e: MouseEvent) {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #60a5fa;
+  background: var(--accent-primary);
   flex-shrink: 0;
 }
 
 /* Close button — hidden by default, visible on hover and always on active */
 .tab-close {
   opacity: 0;
-  color: #64748b;
+  color: var(--text-faint);
   transition: opacity 0.15s, color 0.15s;
   flex-shrink: 0;
   cursor: pointer;
@@ -163,6 +163,6 @@ function onMiddleClick(e: MouseEvent) {
 .session-tab.is-active:hover .tab-close,
 .tab-close:hover {
   opacity: 1;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 </style>

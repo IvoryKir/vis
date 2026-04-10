@@ -101,16 +101,16 @@ defineExpose({
   gap: 4px;
   padding: 8px;
   border-radius: 8px;
-  border: 1px solid #334155;
-  background: rgba(15, 23, 42, 0.98);
-  box-shadow: 0 14px 30px rgba(2, 6, 23, 0.5);
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-surface-2) 98%, transparent);
+  box-shadow: 0 14px 30px color-mix(in srgb, var(--bg-surface-0) 50%, transparent);
 }
 
 .file-ref-popup-item {
-  border: 1px solid #334155;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: rgba(30, 41, 59, 0.7);
-  color: #cbd5e1;
+  background: color-mix(in srgb, var(--bg-surface-4) 70%, transparent);
+  color: var(--text-secondary);
   text-align: left;
   font-size: 12px;
   line-height: 1.3;
@@ -119,7 +119,7 @@ defineExpose({
 }
 
 .file-ref-popup-item:hover {
-  border-color: #7dd3fc;
-  color: #7dd3fc;
+  border-color: var(--color-info);
+  color: var(--color-info);
 }
 </style>

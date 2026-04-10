@@ -146,21 +146,21 @@ const {
   min-height: 0;
   display: flex;
   flex-direction: row;
-  border: 1px solid #334155;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   background-clip: padding-box;
   background: rgba(12, 18, 30, 0.95);
-  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.35);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--bg-surface-0) 35%, transparent);
   overflow: hidden;
 }
 
 .side-toggle {
   width: 26px;
   height: 26px;
-  border: 1px solid rgba(100, 116, 139, 0.45);
+  border: 1px solid color-mix(in srgb, var(--text-faint) 45%, transparent);
   border-radius: 6px;
-  background: rgba(30, 41, 59, 0.92);
-  color: #cbd5e1;
+  background: color-mix(in srgb, var(--bg-surface-4) 92%, transparent);
+  color: var(--text-secondary);
   cursor: pointer;
   font-size: 12px;
   display: inline-flex;
@@ -170,7 +170,7 @@ const {
 }
 
 .side-toggle:hover {
-  background: rgba(51, 65, 85, 0.95);
+  background: color-mix(in srgb, var(--border-color) 95%, transparent);
 }
 
 .side-body {
@@ -186,15 +186,15 @@ const {
   align-items: center;
   gap: 4px;
   padding: 8px;
-  border-bottom: 1px solid rgba(71, 85, 105, 0.42);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-hover) 42%, transparent);
 }
 
 .side-tab {
   flex: 1;
-  border: 1px solid rgba(100, 116, 139, 0.35);
+  border: 1px solid color-mix(in srgb, var(--text-faint) 35%, transparent);
   border-radius: 6px;
-  background: rgba(15, 23, 42, 0.7);
-  color: #94a3b8;
+  background: color-mix(in srgb, var(--bg-surface-2) 70%, transparent);
+  color: var(--text-muted);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -204,12 +204,12 @@ const {
 
 .side-tab.is-active {
   background: rgba(30, 64, 175, 0.45);
-  color: #e2e8f0;
-  border-color: rgba(96, 165, 250, 0.6);
+  color: var(--text-primary);
+  border-color: color-mix(in srgb, var(--accent-primary) 60%, transparent);
 }
 
 .side-panel.is-collapsed {
-  border-color: rgba(100, 116, 139, 0.45);
+  border-color: color-mix(in srgb, var(--text-faint) 45%, transparent);
 }
 
 .side-toggle-inline {

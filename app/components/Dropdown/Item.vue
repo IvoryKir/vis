@@ -108,7 +108,7 @@ a.ui-dropdown-item {
 
 .ui-dropdown-item:hover,
 .ui-dropdown-item[aria-selected='true'] {
-  background: rgba(15, 23, 42, 0.9);
+  background: color-mix(in srgb, var(--bg-surface-2) 90%, transparent);
 }
 
 .ui-dropdown-item.is-disabled {

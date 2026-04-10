@@ -77,24 +77,24 @@ function statusIcon(status: string) {
   align-items: center;
   justify-content: space-between;
   padding: 10px 10px 8px;
-  border-bottom: 1px solid rgba(100, 116, 139, 0.28);
+  border-bottom: 1px solid color-mix(in srgb, var(--text-faint) 28%, transparent);
 }
 
 .todo-title {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .todo-count {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .todo-empty {
   margin: auto;
-  color: rgba(148, 163, 184, 0.9);
+  color: color-mix(in srgb, var(--text-muted) 90%, transparent);
   font-size: 12px;
 }
 
@@ -109,9 +109,9 @@ function statusIcon(status: string) {
 }
 
 .todo-group {
-  border: 1px solid rgba(71, 85, 105, 0.55);
+  border: 1px solid color-mix(in srgb, var(--border-hover) 55%, transparent);
   border-radius: 8px;
-  background: rgba(15, 23, 42, 0.6);
+  background: color-mix(in srgb, var(--bg-surface-2) 60%, transparent);
 }
 
 .todo-group-header {
@@ -119,7 +119,7 @@ function statusIcon(status: string) {
   align-items: center;
   gap: 6px;
   padding: 7px 8px;
-  border-bottom: 1px solid rgba(71, 85, 105, 0.42);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-hover) 42%, transparent);
 }
 
 .todo-group-title {
@@ -129,7 +129,7 @@ function statusIcon(status: string) {
   white-space: nowrap;
   font-size: 12px;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .todo-badge {
@@ -137,14 +137,14 @@ function statusIcon(status: string) {
   padding: 1px 5px;
   border-radius: 999px;
   border: 1px solid rgba(59, 130, 246, 0.5);
-  color: #93c5fd;
+  color: var(--color-info);
   background: rgba(30, 64, 175, 0.25);
   font-size: 10px;
 }
 
 .todo-error {
   padding: 8px;
-  color: #fca5a5;
+  color: var(--color-error-light);
   font-size: 11px;
 }
 
@@ -162,25 +162,25 @@ function statusIcon(status: string) {
   align-items: flex-start;
   gap: 6px;
   font-size: 12px;
-  color: #dbeafe;
+  color: var(--color-info);
 }
 
 .todo-status {
   width: 14px;
   text-align: center;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .todo-item.is-completed .todo-status {
-  color: #86efac;
+  color: var(--color-success);
 }
 
 .todo-item.is-in_progress .todo-status {
-  color: #fcd34d;
+  color: var(--color-warning);
 }
 
 .todo-item.is-cancelled .todo-status {
-  color: #fca5a5;
+  color: var(--color-error-light);
 }
 
 .todo-text {
@@ -194,24 +194,24 @@ function statusIcon(status: string) {
   text-transform: uppercase;
   font-size: 9px;
   letter-spacing: 0.07em;
-  color: #cbd5e1;
-  border: 1px solid rgba(148, 163, 184, 0.45);
+  color: var(--text-secondary);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 45%, transparent);
   border-radius: 999px;
   padding: 2px 5px;
 }
 
 .todo-priority.is-high {
-  color: #fecaca;
+  color: var(--color-error-light);
   border-color: rgba(248, 113, 113, 0.6);
 }
 
 .todo-priority.is-medium {
-  color: #fde68a;
+  color: var(--color-warning-light);
   border-color: rgba(250, 204, 21, 0.6);
 }
 
 .todo-priority.is-low {
-  color: #86efac;
+  color: var(--color-success);
   border-color: rgba(74, 222, 128, 0.6);
 }
 </style>

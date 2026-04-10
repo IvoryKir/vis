@@ -671,8 +671,8 @@ function handleOpenDirectory(close: () => void) {
   margin: -12px -12px 0;
   padding: 8px 12px;
   width: calc(100% + 24px);
-  background: rgba(15, 23, 42, 0.92);
-  border-bottom: 1px solid #334155;
+  background: color-mix(in srgb, var(--bg-surface-2) 92%, transparent);
+  border: 1px solid var(--border-color);
 }
 
 .top-row {
@@ -725,14 +725,14 @@ function handleOpenDirectory(close: () => void) {
   align-items: center;
   gap: 8px;
   padding: 8px;
-  border-bottom: 1px solid #334155;
-  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-surface-2) 90%, transparent);
 }
 
 .search-icon {
   width: 14px;
   height: 14px;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .tree-search :deep(.ui-dropdown-search-input) {
@@ -748,7 +748,7 @@ function handleOpenDirectory(close: () => void) {
 .clear-search {
   border: none;
   background: transparent;
-  color: #64748b;
+  color: var(--text-faint);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -762,13 +762,13 @@ function handleOpenDirectory(close: () => void) {
 }
 
 .tree-worktree + .tree-worktree {
-  border-top: 1px solid #334155;
+  border: 1px solid var(--border-color);
 }
 
 .tree-empty {
   padding: 14px;
   text-align: center;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 12px;
 }
 
@@ -795,7 +795,7 @@ function handleOpenDirectory(close: () => void) {
   flex: 0 0 auto;
   width: 16px;
   height: 16px;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .tree-worktree-header {
@@ -812,7 +812,7 @@ function handleOpenDirectory(close: () => void) {
 
 .tree-label-name {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -822,7 +822,7 @@ function handleOpenDirectory(close: () => void) {
 
 .tree-label-type {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-faint);
   flex-basis: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -839,18 +839,18 @@ function handleOpenDirectory(close: () => void) {
 }
 
 .tree-action-button.new-session {
-  color: #86efac;
+  color: var(--color-success);
 }
 
 .tree-action-button.fork {
-  color: #93c5fd;
+  color: var(--color-info);
 }
 
 .tree-action-button {
-  border: 1px solid #334155;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: #111a2c;
-  color: #cbd5e1;
+  background: var(--bg-surface-3);
+  color: var(--text-secondary);
   font-size: 10px;
   line-height: 1;
   width: 24px;
@@ -863,31 +863,31 @@ function handleOpenDirectory(close: () => void) {
 }
 
 .tree-action-button:hover {
-  background: #1d2a45;
+  background: var(--bg-surface-hover);
 }
 
 .tree-action-button.worktree-settings {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .tree-action-button.danger {
-  color: #fca5a5;
+  color: var(--color-error-light);
 }
 
 .tree-action-button.archive {
-  color: #c4b5fd;
+  color: var(--color-purple);
 }
 
 /* Session rows: wrapper provides indentation via :deep() */
 .tree-session-row :deep(.ui-dropdown-item) {
   padding-left: 40px;
   border-radius: 0;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .tree-session-row :deep(.ui-dropdown-item:hover),
 .tree-session-row :deep(.ui-dropdown-item[aria-selected='true']) {
-  background: rgba(30, 41, 59, 0.8);
+  background: color-mix(in srgb, var(--bg-surface-4) 80%, transparent);
 }
 
 .tree-session-row :deep(.ui-dropdown-item.is-active) {
@@ -909,7 +909,7 @@ function handleOpenDirectory(close: () => void) {
   left: 15px;
   top: 0;
   bottom: 0;
-  border-left: 1px solid rgba(71, 85, 105, 0.5);
+  border-left: 1px solid color-mix(in srgb, var(--border-hover) 50%, transparent);
   pointer-events: none;
 }
 
@@ -920,7 +920,7 @@ function handleOpenDirectory(close: () => void) {
   top: 13px;
   width: 7px;
   height: 0;
-  border-top: 1px solid rgba(71, 85, 105, 0.5);
+  border-top: 1px solid color-mix(in srgb, var(--border-hover) 50%, transparent);
   pointer-events: none;
 }
 
@@ -932,8 +932,8 @@ function handleOpenDirectory(close: () => void) {
   top: 0;
   width: 7px;
   height: 13px;
-  border-left: 1px solid rgba(71, 85, 105, 0.5);
-  border-bottom: 1px solid rgba(71, 85, 105, 0.5);
+  border-left: 1px solid color-mix(in srgb, var(--border-hover) 50%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-hover) 50%, transparent);
   border-bottom-left-radius: 4px;
   pointer-events: none;
 }
@@ -950,7 +950,7 @@ function handleOpenDirectory(close: () => void) {
   left: 31px;
   top: 0;
   bottom: 0;
-  border-left: 1px solid rgba(71, 85, 105, 0.4);
+  border-left: 1px solid color-mix(in srgb, var(--border-hover) 40%, transparent);
   pointer-events: none;
 }
 
@@ -961,7 +961,7 @@ function handleOpenDirectory(close: () => void) {
   top: 14px;
   width: 7px;
   height: 0;
-  border-top: 1px solid rgba(71, 85, 105, 0.4);
+  border-top: 1px solid color-mix(in srgb, var(--border-hover) 40%, transparent);
   pointer-events: none;
 }
 
@@ -973,8 +973,8 @@ function handleOpenDirectory(close: () => void) {
   top: 0;
   width: 7px;
   height: 14px;
-  border-left: 1px solid rgba(71, 85, 105, 0.4);
-  border-bottom: 1px solid rgba(71, 85, 105, 0.4);
+  border-left: 1px solid color-mix(in srgb, var(--border-hover) 40%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border-hover) 40%, transparent);
   border-bottom-left-radius: 4px;
   pointer-events: none;
 }
@@ -997,7 +997,7 @@ function handleOpenDirectory(close: () => void) {
 }
 
 .session-title {
-  color: #e2e8f0;
+  color: var(--text-primary);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1019,7 +1019,7 @@ function handleOpenDirectory(close: () => void) {
 
 .session-time {
   font-size: 10px;
-  color: #64748b;
+  color: var(--text-faint);
   white-space: nowrap;
   flex-basis: 100%;
 }
@@ -1029,7 +1029,7 @@ function handleOpenDirectory(close: () => void) {
   margin-left: auto;
   font-size: 10px;
   line-height: 1;
-  color: #c4b5fd;
+  color: var(--color-purple);
   background: rgba(139, 92, 246, 0.15);
   border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 999px;
@@ -1043,9 +1043,9 @@ function handleOpenDirectory(close: () => void) {
 
 .tree-footer {
   flex: 0 0 auto;
-  border-top: 1px solid #334155;
+  border: 1px solid var(--border-color);
   padding: 8px;
-  background: #0b1320;
+  background: var(--bg-surface-1);
 }
 
 .tree-footer-button {
@@ -1054,24 +1054,24 @@ function handleOpenDirectory(close: () => void) {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border: 1px solid #334155;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #111a2c;
-  color: #e2e8f0;
+  background: var(--bg-surface-3);
+  color: var(--text-primary);
   padding: 6px 10px;
   font-size: 12px;
   cursor: pointer;
 }
 
 .tree-footer-button:hover {
-  background: #1d2a45;
+  background: var(--bg-surface-hover);
 }
 
 .control-button {
-  border: 1px solid #334155;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: #0b1320;
-  color: #e2e8f0;
+  background: var(--bg-surface-1);
+  color: var(--text-primary);
   padding: 6px 12px;
   font-size: 12px;
   display: inline-flex;
@@ -1086,12 +1086,12 @@ function handleOpenDirectory(close: () => void) {
   flex-shrink: 0;
   padding: 0;
   justify-content: center;
-  color: #86efac;
+  color: var(--color-success);
 }
 
 .new-session-button:hover,
 .open-shell-button:hover {
-  background: #1d2a45;
+  background: var(--bg-surface-hover);
 }
 
 .open-shell-button {
@@ -1100,7 +1100,7 @@ function handleOpenDirectory(close: () => void) {
   flex-shrink: 0;
   padding: 0;
   justify-content: center;
-  color: #c4b5fd;
+  color: var(--color-purple);
 }
 
 .notification-button {
@@ -1110,11 +1110,11 @@ function handleOpenDirectory(close: () => void) {
   flex-shrink: 0;
   padding: 0;
   justify-content: center;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .notification-button.has-notifications {
-  color: #fbbf24;
+  color: var(--color-warning-light);
 }
 
 .notification-badge {
@@ -1125,8 +1125,8 @@ function handleOpenDirectory(close: () => void) {
   height: 16px;
   padding: 0 4px;
   border-radius: 999px;
-  background: #ef4444;
-  color: #fff;
+  background: var(--color-error);
+  color: var(--text-primary);
   font-size: 10px;
   font-weight: 700;
   line-height: 16px;
@@ -1134,15 +1134,15 @@ function handleOpenDirectory(close: () => void) {
 }
 
 .tree-dropdown-root :deep(.ui-dropdown-button) {
-  background: #0b1320;
-  border-color: #334155;
-  color: #e2e8f0;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   box-shadow: none;
 }
 
 .tree-dropdown-root :deep(.ui-dropdown-menu) {
-  background: #0b1320;
-  border: 1px solid #334155;
+  background: var(--bg-surface-1);
+  border: 1px solid var(--border-color);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -1179,11 +1179,11 @@ function handleOpenDirectory(close: () => void) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border: 1px solid #334155;
+  border: 1px solid var(--border-color);
   border-radius: 999px;
   padding: 2px 6px;
-  color: #cbd5e1;
-  background: #111a2c;
+  color: var(--text-secondary);
+  background: var(--bg-surface-3);
   font-size: 11px;
   line-height: 1;
 }
@@ -1203,12 +1203,12 @@ function handleOpenDirectory(close: () => void) {
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .github-button:hover {
   background: transparent;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .menu-button {
@@ -1219,18 +1219,18 @@ function handleOpenDirectory(close: () => void) {
   justify-content: center;
   border: none;
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .menu-button:hover {
   background: transparent;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .menu-item-content {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 </style>

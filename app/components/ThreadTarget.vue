@@ -64,14 +64,14 @@ const hasTarget = computed(() => {
 }
 
 .ib-target-provider {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .ib-target-separator {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .ib-target-variant {
-  color: #f59e0b;
+  color: var(--color-warning);
 }
 </style>

@@ -322,16 +322,16 @@ defineExpose({ panelEl });
   min-height: 0;
   overflow: hidden;
   position: relative;
-  background-color: rgba(15, 23, 42, 0.92);
+  background-color: color-mix(in srgb, var(--bg-surface-2) 92%, transparent);
   background-image: linear-gradient(
     color-mix(in srgb, var(--project-tint, transparent) 9%, transparent),
     color-mix(in srgb, var(--project-tint, transparent) 9%, transparent)
   );
-  color: #e2e8f0;
-  border: 1px solid #334155;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   background-clip: padding-box;
-  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.45);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--bg-surface-0) 45%, transparent);
   display: flex;
   flex-direction: column;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
@@ -374,27 +374,27 @@ defineExpose({ panelEl });
 .output-panel-content :deep(.markdown-host code.file-ref) {
   cursor: pointer;
   text-decoration: underline;
-  text-decoration-color: rgba(125, 211, 252, 0.4);
+  text-decoration-color: color-mix(in srgb, var(--color-info) 40%, transparent);
   text-underline-offset: 2px;
 }
 
 .output-panel-content :deep(.markdown-host code.file-ref:hover) {
-  text-decoration-color: #7dd3fc;
-  color: #7dd3fc;
+  text-decoration-color: var(--color-info);
+  color: var(--color-info);
 }
 
 .output-panel-content :deep(.markdown-host code.commit-ref) {
   cursor: pointer;
   text-decoration: underline;
-  text-decoration-color: rgba(125, 211, 252, 0.4);
+  text-decoration-color: color-mix(in srgb, var(--color-info) 40%, transparent);
   text-decoration-style: dotted;
   text-underline-offset: 2px;
 }
 
 .output-panel-content :deep(.markdown-host code.commit-ref:hover) {
-  text-decoration-color: #7dd3fc;
+  text-decoration-color: var(--color-info);
   text-decoration-style: dotted;
-  color: #7dd3fc;
+  color: var(--color-info);
 }
 
 .output-panel-content :deep(.markdown-host code.color-ref::before) {
@@ -407,7 +407,7 @@ defineExpose({ panelEl });
   background-color: var(--preview-color);
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 2px;
-  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.5);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--bg-surface-2) 50%, transparent);
 }
 
 .project-name-bar {
@@ -415,7 +415,7 @@ defineExpose({ panelEl });
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.03em;
-  color: color-mix(in srgb, var(--project-tint, #94a3b8) 60%, #94a3b8);
+  color: color-mix(in srgb, var(--project-tint, var(--text-muted)) 60%, var(--text-muted));
   padding: 12px 12px 0;
   user-select: none;
 }
@@ -430,20 +430,20 @@ defineExpose({ panelEl });
   aspect-ratio: 1 / 1;
   box-sizing: border-box;
   border-radius: 999px;
-  border: 1px solid #334155;
-  background: rgba(15, 23, 42, 0.92);
-  color: #e2e8f0;
+  border: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--bg-surface-2) 92%, transparent);
+  color: var(--text-primary);
   font-size: 18px;
   line-height: 1;
   display: grid;
   place-items: center;
-  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.45);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--bg-surface-0) 45%, transparent);
   cursor: pointer;
   z-index: 3;
 }
 
 .follow-button:hover {
-  background: rgba(30, 41, 59, 0.98);
+  background: color-mix(in srgb, var(--bg-surface-4) 98%, transparent);
 }
 
 .app-loading-spinner {
@@ -451,8 +451,8 @@ defineExpose({ panelEl });
   height: 26px;
   margin: 0 auto 12px;
   border-radius: 50%;
-  border: 3px solid rgba(148, 163, 184, 0.4);
-  border-top-color: #e2e8f0;
+  border: 3px solid color-mix(in srgb, var(--text-muted) 40%, transparent);
+  border-top-color: var(--text-primary);
   animation: app-loading-spin 0.85s linear infinite;
 }
 

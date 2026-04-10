@@ -428,9 +428,9 @@ defineExpose({ moveHighlight, selectHighlighted, updateSearch, clearHighlight })
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  background: #0b1320;
-  color: #e2e8f0;
-  border: 1px solid #334155;
+  background: var(--bg-surface-1);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 6px 8px;
   font-size: 12px;
@@ -474,12 +474,12 @@ defineExpose({ moveHighlight, selectHighlighted, updateSearch, clearHighlight })
   max-width: calc(100vw - 16px);
   max-height: 60vh;
   position-try-fallbacks: flip-block;
-  background: rgba(2, 6, 23, 0.98);
-  border: 1px solid #334155;
+  background: color-mix(in srgb, var(--bg-surface-0) 98%, transparent);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 6px;
   scroll-padding: 6px;
-  box-shadow: 0 12px 24px rgba(2, 6, 23, 0.45);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--bg-surface-0) 45%, transparent);
   overflow: auto;
   z-index: 120;
 }

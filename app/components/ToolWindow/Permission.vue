@@ -148,7 +148,7 @@ function emitReply(reply: PermissionReply) {
   min-height: 0;
   padding: 8px;
   box-sizing: border-box;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 12px;
 }
 
@@ -166,7 +166,7 @@ function emitReply(reply: PermissionReply) {
 
 .permission-type {
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   text-align: right;
@@ -176,10 +176,10 @@ function emitReply(reply: PermissionReply) {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 20%, transparent);
   border-radius: 8px;
   padding: 6px 8px;
-  background: rgba(15, 23, 42, 0.35);
+  background: color-mix(in srgb, var(--bg-surface-2) 35%, transparent);
 }
 
 .permission-row {
@@ -190,19 +190,19 @@ function emitReply(reply: PermissionReply) {
 }
 
 .permission-label {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 11px;
 }
 
 .permission-value {
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 11px;
   word-break: break-all;
 }
 
 .divider {
   margin: 0 4px;
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .permission-body {
@@ -218,10 +218,10 @@ function emitReply(reply: PermissionReply) {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 20%, transparent);
   border-radius: 8px;
   padding: 6px 8px;
-  background: rgba(2, 6, 23, 0.45);
+  background: color-mix(in srgb, var(--bg-surface-0) 45%, transparent);
 }
 
 .section-title {
@@ -253,12 +253,12 @@ function emitReply(reply: PermissionReply) {
 }
 
 .metadata-key {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 11px;
 }
 
 .metadata-value {
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-size: 11px;
   white-space: nowrap;
   overflow: hidden;
@@ -266,12 +266,12 @@ function emitReply(reply: PermissionReply) {
 }
 
 .empty {
-  color: #64748b;
+  color: var(--text-faint);
   font-size: 11px;
 }
 
 .permission-error {
-  color: #fecaca;
+  color: var(--color-error-light);
   font-size: 11px;
 }
 
@@ -279,16 +279,16 @@ function emitReply(reply: PermissionReply) {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  border-top: 1px solid rgba(148, 163, 184, 0.25);
+  border-top: 1px solid color-mix(in srgb, var(--text-muted) 25%, transparent);
   padding-top: 8px;
 }
 
 .permission-button {
   border-radius: 8px;
   padding: 6px 10px;
-  border: 1px solid #334155;
-  background: #0f172a;
-  color: #e2e8f0;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface-2);
+  color: var(--text-primary);
   font-size: 11px;
   cursor: pointer;
 }

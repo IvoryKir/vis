@@ -476,7 +476,7 @@ function historyEntryColor(entry: HistoryEntry) {
 
 function historyEntryStyle(entry: HistoryEntry) {
   const color = historyEntryColor(entry);
-  return { borderLeftColor: color ? `${color}99` : '#334155' };
+  return { borderLeftColor: color ? `${color}99` : 'var(--border-color)' };
 }
 
 function historyEntryAgentStyle(entry: HistoryEntry) {
@@ -940,7 +940,7 @@ function findThinkingChoice(key: unknown): ThinkingChoice | undefined {
 function thinkingValueStyle(key: unknown) {
   const choice = findThinkingChoice(key);
   if (!choice || choice.value === undefined) return undefined;
-  return { color: '#f59e0b' };
+  return { color: 'var(--color-warning)' };
 }
 
 const groupedModelOptions = computed(() => {
@@ -1018,7 +1018,7 @@ const inputMessageStyle = computed(() => {
   height: 100%;
   min-height: 0;
   box-sizing: border-box;
-  color: #e2e8f0;
+  color: var(--text-primary);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
 }
 
@@ -1031,12 +1031,12 @@ const inputMessageStyle = computed(() => {
   flex-direction: column;
   align-items: stretch;
   overflow: visible;
-  background-color: rgba(15, 23, 42, 0.92);
+  background-color: color-mix(in srgb, var(--bg-surface-2) 92%, transparent);
   background-image: linear-gradient(var(--agent-tint, transparent), var(--agent-tint, transparent));
-  border: 1px solid #334155;
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   box-sizing: border-box;
-  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.45);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--bg-surface-0) 45%, transparent);
 }
 
 .input-message:has(.input-textarea:disabled) {
@@ -1049,7 +1049,7 @@ const inputMessageStyle = computed(() => {
   align-items: center;
   gap: 4px;
   padding: 4px 8px 8px;
-  border-top: 1px solid rgba(51, 65, 85, 0.35);
+  border-top: 1px solid color-mix(in srgb, var(--border-color) 35%, transparent);
   flex: 0 0 auto;
 }
 
@@ -1085,7 +1085,7 @@ const inputMessageStyle = computed(() => {
 :deep(.input-control) {
   width: 100%;
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-muted);
   border: 1px solid transparent;
   border-radius: 8px;
   padding: 4px 8px;
@@ -1100,8 +1100,8 @@ const inputMessageStyle = computed(() => {
 }
 
 :deep(.input-control):hover:not(:disabled) {
-  background: rgba(51, 65, 85, 0.35);
-  color: #e2e8f0;
+  background: color-mix(in srgb, var(--border-color) 35%, transparent);
+  color: var(--text-primary);
 }
 
 :deep(.input-control):focus-visible {
@@ -1140,7 +1140,7 @@ const inputMessageStyle = computed(() => {
 .dropdown-empty {
   padding: 6px 8px;
   font-size: 12px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .dropdown-item-label {
@@ -1161,13 +1161,13 @@ const inputMessageStyle = computed(() => {
 
 .agent-dropdown-name {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
 .agent-dropdown-description {
   font-size: 10px;
-  color: #94a3b8;
+  color: var(--text-muted);
   line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1190,7 +1190,7 @@ const inputMessageStyle = computed(() => {
 .model-button-provider {
   position: fixed;
   font-size: 9px;
-  color: #94a3b8;
+  color: var(--text-muted);
   white-space: nowrap;
   text-overflow: ellipsis;
   transform: translate(-3px, -11px);
@@ -1198,7 +1198,7 @@ const inputMessageStyle = computed(() => {
 
 .model-button-name {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1241,13 +1241,13 @@ const inputMessageStyle = computed(() => {
 
 .model-dropdown-name {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 
 .model-dropdown-path {
   font-size: 10px;
-  color: #94a3b8;
+  color: var(--text-muted);
   line-height: 1.2;
 }
 
@@ -1269,7 +1269,7 @@ const inputMessageStyle = computed(() => {
   border: none;
   border-radius: inherit;
   background: transparent;
-  color: #e2e8f0;
+  color: var(--text-primary);
   outline: none;
   padding: 12px 16px;
   box-sizing: border-box;
@@ -1287,7 +1287,7 @@ const inputMessageStyle = computed(() => {
   gap: 6px;
   width: 100%;
   padding: 6px 8px 8px;
-  border-top: 1px solid #1e293b;
+  border: 1px solid var(--border-faint);
   box-sizing: border-box;
   max-height: 45%;
   overflow: auto;
@@ -1303,8 +1303,8 @@ const inputMessageStyle = computed(() => {
   gap: 8px;
   padding: 6px 8px;
   border-radius: 8px;
-  border: 1px solid #1e293b;
-  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid var(--border-faint);
+  background: color-mix(in srgb, var(--bg-surface-0) 60%, transparent);
   box-sizing: border-box;
 }
 
@@ -1312,9 +1312,9 @@ const inputMessageStyle = computed(() => {
   width: 36px;
   height: 36px;
   border-radius: 6px;
-  border: 1px solid #334155;
+  border: 1px solid var(--border-color);
   object-fit: cover;
-  background: #0b1320;
+  background: var(--bg-surface-1);
 }
 
 .attachment-thumb.clickable {
@@ -1331,7 +1331,7 @@ const inputMessageStyle = computed(() => {
 
 .attachment-name {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1339,13 +1339,13 @@ const inputMessageStyle = computed(() => {
 
 .attachment-type {
   font-size: 10px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .attachment-remove {
-  background: #1e293b;
-  color: #e2e8f0;
-  border: 1px solid #334155;
+  background: var(--bg-surface-4);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 4px;
   font-size: 10px;
@@ -1391,12 +1391,12 @@ const inputMessageStyle = computed(() => {
 }
 .command-name {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   line-height: 1.2;
 }
 .command-desc {
   font-size: 10px;
-  color: #94a3b8;
+  color: var(--text-muted);
   line-height: 1.2;
 }
 
@@ -1423,17 +1423,17 @@ const inputMessageStyle = computed(() => {
   max-height: 50vh;
   overflow: auto;
   /* Match input panel background */
-  background: rgba(15, 23, 42, 0.92);
-  border: 1px solid #334155;
+  background: color-mix(in srgb, var(--bg-surface-2) 92%, transparent);
+  border: 1px solid var(--border-color);
   outline: none;
-  box-shadow: 0 -8px 24px rgba(2, 6, 23, 0.5);
+  box-shadow: 0 -8px 24px color-mix(in srgb, var(--bg-surface-0) 50%, transparent);
   box-sizing: border-box;
 }
 
 :deep(.history-popup) .ui-dropdown-item {
   /* Match thread-block style */
-  background: rgba(2, 6, 23, 0.6);
-  border: 1px solid #1e293b;
+  background: color-mix(in srgb, var(--bg-surface-0) 60%, transparent);
+  border: 1px solid var(--border-faint);
   border-radius: 10px;
   padding: 8px;
 }
@@ -1444,12 +1444,12 @@ const inputMessageStyle = computed(() => {
 
 :deep(.history-popup) .ui-dropdown-item[aria-selected='true'],
 :deep(.history-popup) .ui-dropdown-item:hover {
-  background: rgba(30, 41, 59, 0.7);
-  border-color: #475569;
+  background: color-mix(in srgb, var(--bg-surface-4) 70%, transparent);
+  border-color: var(--border-hover);
 }
 
 .history-item {
-  border-left: 3px solid #334155;
+  border: 1px solid var(--border-color);
   padding-left: 8px;
   flex: 1 1 auto;
   min-width: 0;
@@ -1457,7 +1457,7 @@ const inputMessageStyle = computed(() => {
 
 .history-item-text {
   font-size: 12px;
-  color: #e2e8f0;
+  color: var(--text-primary);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1495,15 +1495,15 @@ const inputMessageStyle = computed(() => {
 }
 
 .history-target-provider {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .history-target-separator {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .history-target-variant {
-  color: #f59e0b;
+  color: var(--color-warning);
 }
 
 .history-action-button {
@@ -1514,7 +1514,7 @@ const inputMessageStyle = computed(() => {
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
-  color: #64748b;
+  color: var(--text-faint);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1522,24 +1522,24 @@ const inputMessageStyle = computed(() => {
 }
 
 .history-action-button:hover {
-  color: #4ade80;
+  color: var(--color-success);
   background: rgba(34, 197, 94, 0.14);
   border-color: rgba(34, 197, 94, 0.3);
 }
 
 .history-action-button.is-favorited {
-  color: #4ade80;
+  color: var(--color-success);
 }
 
 .history-action-button.remove:hover {
-  color: #f87171;
+  color: var(--color-error);
   background: rgba(248, 113, 113, 0.14);
   border-color: rgba(248, 113, 113, 0.3);
 }
 
 .input-button {
   background: transparent;
-  color: #94a3b8;
+  color: var(--text-muted);
   border: 1px solid transparent;
   border-radius: 8px;
   width: 28px;
@@ -1557,8 +1557,8 @@ const inputMessageStyle = computed(() => {
 }
 
 .input-button:hover:not(:disabled) {
-  background: rgba(51, 65, 85, 0.35);
-  color: #e2e8f0;
+  background: color-mix(in srgb, var(--border-color) 35%, transparent);
+  color: var(--text-primary);
 }
 
 .input-button:disabled {
@@ -1572,7 +1572,7 @@ const inputMessageStyle = computed(() => {
   border-radius: 50%;
   width: 32px;
   height: 32px;
-  color: #60a5fa;
+  color: var(--accent-primary);
 }
 
 .input-button.primary:hover:not(:disabled) {
@@ -1586,12 +1586,12 @@ const inputMessageStyle = computed(() => {
   border-radius: 50%;
   width: 32px;
   height: 32px;
-  color: #f87171;
+  color: var(--color-error);
 }
 
 .input-button.stop:hover:not(:disabled) {
   background: rgba(220, 38, 38, 0.35);
-  color: #fca5a5;
+  color: var(--color-error-light);
 }
 
 .input-actions {
@@ -1607,12 +1607,12 @@ const inputMessageStyle = computed(() => {
 
 .suppress-button.active {
   background: rgba(239, 68, 68, 0.2);
-  color: #f87171;
+  color: var(--color-error);
 }
 
 .suppress-button.active:hover {
   background: rgba(239, 68, 68, 0.35);
-  color: #fca5a5;
+  color: var(--color-error-light);
 }
 
 .bookmark-button {
@@ -1621,7 +1621,7 @@ const inputMessageStyle = computed(() => {
 
 .bookmark-button:hover:not(:disabled) {
   background: rgba(34, 197, 94, 0.15);
-  color: #4ade80;
+  color: var(--color-success);
 }
 
 .bookmark-toast {
@@ -1629,15 +1629,15 @@ const inputMessageStyle = computed(() => {
   bottom: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(15, 23, 42, 0.95);
-  color: #4ade80;
+  background: color-mix(in srgb, var(--bg-surface-2) 95%, transparent);
+  color: var(--color-success);
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(34, 197, 94, 0.35);
-  box-shadow: 0 4px 12px rgba(2, 6, 23, 0.5);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--bg-surface-0) 50%, transparent);
   pointer-events: none;
 }
 

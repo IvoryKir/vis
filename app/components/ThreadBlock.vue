@@ -170,7 +170,7 @@ const threadTarget = computed<ThreadTargetType>(() => buildThreadTarget(props.ro
 const threadTargetAgentStyle = computed(() => {
   const color = props.resolveAgentColor
     ? props.resolveAgentColor(threadTarget.value.agent)
-    : '#4ade80';
+    : 'var(--color-success)';
   return { color };
 });
 
@@ -414,7 +414,7 @@ function getUserBoxStyle() {
   const final = getFinalAnswer(props.root);
   const color = props.resolveAgentColor
     ? props.resolveAgentColor(props.root.agent ?? final?.agent)
-    : '#334155';
+    : 'var(--bg-surface-5)';
   if (color.startsWith('#') && color.length === 7) {
     return { borderLeftColor: `${color}99` };
   }
@@ -500,8 +500,8 @@ function getThreadUserRenderKey(root: MessageInfo): string {
 
 <style scoped>
 .thread-block {
-  background: rgba(2, 6, 23, 0.6);
-  border: 1px solid #1e293b;
+  background: color-mix(in srgb, var(--bg-surface-0) 60%, transparent);
+  border: 1px solid var(--border-faint);
   border-radius: 10px;
   padding: 10px;
   width: 100%;
@@ -573,10 +573,10 @@ function getThreadUserRenderKey(root: MessageInfo): string {
 }
 
 .ib-action {
-  border: 1px solid rgba(148, 163, 184, 0.65);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 65%, transparent);
   border-radius: 6px;
-  background: rgba(15, 23, 42, 0.75);
-  color: #bfdbfe;
+  background: color-mix(in srgb, var(--bg-surface-2) 75%, transparent);
+  color: var(--color-info);
   font-size: 10px;
   line-height: 1;
   padding: 3px 7px;
@@ -585,13 +585,13 @@ function getThreadUserRenderKey(root: MessageInfo): string {
 }
 
 .ib-action:hover {
-  background: rgba(30, 41, 59, 0.92);
+  background: color-mix(in srgb, var(--bg-surface-4) 92%, transparent);
 }
 
 .ib-action-undo {
-  border-color: rgba(96, 165, 250, 0.7);
-  background: rgba(30, 58, 138, 0.35);
-  color: #bfdbfe;
+  border-color: color-mix(in srgb, var(--accent-primary) 70%, transparent);
+  background: color-mix(in srgb, var(--accent-dark) 35%, transparent);
+  color: var(--color-info);
 }
 
 .ib-action-undo:hover {
@@ -599,17 +599,17 @@ function getThreadUserRenderKey(root: MessageInfo): string {
 }
 
 .ib-action-history {
-  border-color: rgba(148, 163, 184, 0.5);
-  background: rgba(30, 41, 59, 0.35);
-  color: #94a3b8;
+  border-color: color-mix(in srgb, var(--text-muted) 50%, transparent);
+  background: color-mix(in srgb, var(--bg-surface-4) 35%, transparent);
+  color: var(--text-muted);
   font-size: 10px;
   margin-top: 4px;
   align-self: flex-end;
 }
 
 .ib-action-history:hover {
-  background: rgba(51, 65, 85, 0.55);
-  color: #cbd5e1;
+  background: color-mix(in srgb, var(--border-color) 55%, transparent);
+  color: var(--text-secondary);
 }
 
 .ib-error-bar {
@@ -621,7 +621,7 @@ function getThreadUserRenderKey(root: MessageInfo): string {
   border-radius: 6px;
   background: rgba(127, 29, 29, 0.3);
   border: 1px solid rgba(248, 113, 113, 0.4);
-  color: #fca5a5;
+  color: var(--color-error-light);
   font-size: 11px;
   line-height: 1.3;
 }
@@ -629,7 +629,7 @@ function getThreadUserRenderKey(root: MessageInfo): string {
 .ib-error-icon {
   flex-shrink: 0;
   font-size: 13px;
-  color: #f87171;
+  color: var(--color-error);
 }
 
 .ib-error-text {
@@ -660,9 +660,9 @@ function getThreadUserRenderKey(root: MessageInfo): string {
   width: 100%;
   max-height: 180px;
   border-radius: 8px;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border-faint);
   object-fit: cover;
-  background: #0b1320;
+  background: var(--bg-surface-1);
 }
 
 .output-entry-attachment.clickable {

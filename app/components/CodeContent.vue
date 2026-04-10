@@ -114,8 +114,8 @@ const rootClass = computed(() => {
 /* grep */
 
 .code-content :deep(.grep-match) {
-  color: #fef08a;
-  background: rgba(234, 179, 8, 0.3);
+  color: var(--color-warning-light);
+  background: color-mix(in srgb, var(--color-warning) 30%, transparent);
   border-radius: 2px;
   padding: 0 0.08em;
   font-weight: 700;
@@ -128,7 +128,7 @@ const rootClass = computed(() => {
 /* diff */
 
 .code-content.is-diff :deep(.code-row.line-added) {
-  background: rgba(46, 160, 67, 0.22);
+  background: color-mix(in srgb, var(--color-success) 22%, transparent);
 }
 
 .code-content.is-diff :deep(.code-row.line-added) .line {
@@ -137,7 +137,7 @@ const rootClass = computed(() => {
 }
 
 .code-content.is-diff :deep(.code-row.line-removed) {
-  background: rgba(248, 81, 73, 0.2);
+  background: color-mix(in srgb, var(--color-error) 20%, transparent);
 }
 
 .code-content.is-diff :deep(.code-row.line-removed) .line {
@@ -146,7 +146,7 @@ const rootClass = computed(() => {
 }
 
 .code-content.is-diff :deep(.code-row.line-hunk) {
-  background: rgba(56, 139, 253, 0.18);
+  background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
 }
 
 .code-content.is-diff :deep(.code-row.line-hunk) .line {
@@ -155,7 +155,7 @@ const rootClass = computed(() => {
 }
 
 .code-content.is-diff :deep(.code-row.line-header) {
-  background: rgba(110, 118, 129, 0.18);
+  background: color-mix(in srgb, var(--text-muted) 18%, transparent);
 }
 
 .code-content.is-diff :deep(.code-row.line-header) .line {
@@ -175,26 +175,26 @@ const rootClass = computed(() => {
 }
 
 .code-content.is-binary :deep(.hexdump-address) {
-  color: #60a5fa;
+  color: var(--accent-primary);
 }
 
 .code-content.is-binary :deep(.hexdump-separator) {
-  color: #64748b;
+  color: var(--text-faint);
 }
 
 .code-content.is-binary :deep(.hexdump-control) {
-  color: #f59e0b;
+  color: var(--color-warning);
 }
 
 .code-content.is-binary :deep(.hexdump-ascii) {
-  color: #dbeafe;
+  color: var(--color-info);
 }
 
 .code-content.is-binary :deep(.hexdump-exascii) {
-  color: #fca5a5;
+  color: var(--color-error-light);
 }
 
 .code-content.is-binary :deep(.hexdump-null) {
-  color: #64748b;
+  color: var(--text-faint);
 }
 </style>

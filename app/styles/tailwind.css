@@ -6,14 +6,14 @@
   --font-sans:
     'SF Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, Monaco, Consolas,
     'Liberation Mono', 'Courier New', monospace;
-  --color-surface-900: #0f172a;
-  --color-surface-800: #1e293b;
-  --color-surface-700: #334155;
-  --color-text-100: #e2e8f0;
-  --color-text-300: #94a3b8;
-  --color-accent-400: #60a5fa;
-  --color-success-400: #22c55e;
-  --color-warning-300: #fef08a;
+  --color-surface-900: var(--bg-surface-2);
+  --color-surface-800: var(--bg-surface-4);
+  --color-surface-700: var(--bg-surface-5);
+  --color-text-100: var(--text-primary);
+  --color-text-300: var(--text-muted);
+  --color-accent-400: var(--accent-primary);
+  --color-success-400: var(--color-success-dark);
+  --color-warning-300: var(--color-warning-light);
 }
 
 /* ── Unified scrollbar ── */
@@ -25,7 +25,7 @@
 }
 
 *:hover {
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-color: var(--scrollbar-thumb, rgba(255, 255, 255, 0.15)) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -43,15 +43,15 @@
 }
 
 *:hover::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--scrollbar-thumb, rgba(255, 255, 255, 0.15));
 }
 
 ::highlight(fw-search) {
   background: rgba(234, 179, 8, 0.35);
-  color: #fef08a;
+  color: var(--color-warning-light);
 }
 
 ::highlight(fw-search-current) {
   background: rgba(59, 130, 246, 0.58);
-  color: #ffffff;
+  color: var(--text-primary);
 }
