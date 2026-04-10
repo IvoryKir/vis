@@ -33,6 +33,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.9",
+    "diff": "^8.0.4",
+    "diff2html": "^3.4.56",
     "hono": "^4.12.3"
   },
   "devDependencies": {
