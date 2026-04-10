@@ -15,6 +15,8 @@
 
 use std::sync::Mutex;
 
+#[cfg(not(dev))]
+use tauri::ipc::CapabilityBuilder;
 use tauri::{webview::WebviewWindowBuilder, Manager, RunEvent, WebviewUrl, WebviewWindow};
 use tauri_plugin_shell::process::{CommandChild, CommandEvent};
 use tauri_plugin_shell::ShellExt;
@@ -343,15 +345,86 @@ fn install_signal_handlers(app_handle: tauri::AppHandle) {
 fn install_signal_handlers(_app_handle: tauri::AppHandle) {
     // TODO: SetConsoleCtrlHandler on Windows when we ship a Windows build.
 }
+
+/// Install a `.desktop` file and icon into `~/.local/share/` so that Linux
+/// desktop environments (GNOME, KDE, etc.) can resolve the app icon via
+/// `WM_CLASS` / `app_id`.
+///
+/// AppImages are self-contained and don't install anything into the system,
+/// so without this the DE shows a generic fallback icon.
+#[cfg(target_os = "linux")]
+fn install_desktop_entry() {
+    use std::fs;
+    use std::path::PathBuf;
+
+    let Some(home) = std::env::var_os("HOME") else { return };
+    let home = PathBuf::from(home);
+
+    // --- Install icon ---
+    let icon_dir = home.join(".local/share/icons/hicolor/128x128/apps");
+    let _ = fs::create_dir_all(&icon_dir);
+    let icon_path = icon_dir.join("vis-desktop.png");
+    // Always overwrite so updates to the icon are picked up.
+    let _ = fs::write(&icon_path, include_bytes!("../icons/128x128.png"));
+
+    // --- Install .desktop file ---
+    let apps_dir = home.join(".local/share/applications");
+    let _ = fs::create_dir_all(&apps_dir);
+    let desktop_path = apps_dir.join("vis-desktop.desktop");
+
+    // Resolve our own executable path for the Exec= line.
+    let exe = std::env::current_exe()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|_| "vis-desktop".to_string());
+
+    let desktop_content = format!(
+        "[Desktop Entry]\n\
+         Name=Vis\n\
+         Comment=Beautiful OpenCode UI\n\
+         Exec={exe}\n\
+         Icon=vis-desktop\n\
+         Terminal=false\n\
+         Type=Application\n\
+         Categories=Development;\n\
+         StartupWMClass=vis-desktop\n"
+    );
+    let _ = fs::write(&desktop_path, desktop_content);
+}
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Pick a random free port for the embedded frontend HTTP server. We use
-    // the `portpicker` crate because `tauri-plugin-localhost::Builder::new`
-    // wants a concrete u16, not a "pick one for me" option. This port serves
-    // the bundled Vue SPA to the webview — opencode itself runs on its own
-    // separate random port, chosen by opencode when we spawn it.
-    let frontend_port: u16 = portpicker::pick_unused_port()
-        .expect("failed to find an unused TCP port for the Vis frontend");
+    // Pick the port for the embedded frontend HTTP server.
+    //
+    // CRITICAL: We use a FIXED preferred port so that WebKitGTK (Linux)
+    // stores localStorage in the same SQLite file between app restarts.
+    // WebKitGTK keys localStorage by origin — `http://localhost:<port>` —
+    // so if the port changes each run, the user's theme, settings, and
+    // session tabs are lost every time.
+    //
+    // If the preferred port is busy (e.g. two instances running), we
+    // fall back to a random one. State won't persist in that second
+    // instance, but at least it won't crash.
+    const PREFERRED_FRONTEND_PORT: u16 = 14321;
+    let frontend_port: u16 = if portpicker::is_free_tcp(PREFERRED_FRONTEND_PORT) {
+        PREFERRED_FRONTEND_PORT
+    } else {
+        eprintln!(
+            "[vis] preferred frontend port {} is busy, falling back to random",
+            PREFERRED_FRONTEND_PORT
+        );
+        portpicker::pick_unused_port()
+            .expect("failed to find an unused TCP port for the Vis frontend")
+    };
+
+    // On Linux (Wayland/X11) the desktop environment resolves the app icon
+    // from a .desktop file matched by WM_CLASS / app_id. AppImages are
+    // self-contained and do NOT install .desktop files into the system,
+    // so GNOME/KDE/etc. fall back to a generic gear icon.
+    //
+    // Fix: on first run, install a .desktop file + icon into
+    // ~/.local/share/applications and ~/.local/share/icons so the DE
+    // can find and display our real icon.
+    #[cfg(target_os = "linux")]
+    install_desktop_entry();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
@@ -365,7 +438,21 @@ pub fn run() {
             let url: tauri::Url = format!("http://localhost:{frontend_port}")
                 .parse()
                 .expect("failed to build localhost url");
-            WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url))
+
+            // In release mode the frontend is served over http://localhost:<port>
+            // which Tauri treats as a *remote* origin. We must explicitly grant
+            // it the same IPC capabilities as the built-in tauri:// scheme,
+            // otherwise `invoke()` calls and event listeners are silently blocked.
+            // See: https://github.com/tauri-apps/plugins-workspace/blob/v2/plugins/localhost/README.md
+            #[cfg(not(dev))]
+            app.add_capability(
+                CapabilityBuilder::new("localhost-remote")
+                    .remote(url.to_string())
+                    .window("main"),
+            )?;
+
+            WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url.clone()))
+                .icon(tauri::image::Image::from_bytes(include_bytes!("../icons/128x128.png"))?)?
                 .title("Vis \u{2014} OpenCode Visualizer")
                 .inner_size(1400.0, 900.0)
                 .min_inner_size(900.0, 600.0)
