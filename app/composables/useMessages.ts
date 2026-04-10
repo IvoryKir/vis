@@ -125,10 +125,20 @@ function byTimeThenId(a: MessageInfo, b: MessageInfo): number {
   return a.id.localeCompare(b.id);
 }
 
-// Module-level singleton state
-const acc = useDeltaAccumulator();
-const messages = shallowRef(new Map<string, ShallowRef<MessageEntry>>());
-const parts = new Map<string, ShallowRef<MessagePart>>();
+// ---------------------------------------------------------------------------
+// Per-session message store factory.
+//
+// Before Phase 2 this was module-level singleton state. Now each call to
+// `createMessages()` returns a fresh, isolated store. `useMessages(sessionId)`
+// below maintains a keyed cache so that the same store is returned for the
+// same session ID throughout the app lifetime.
+// ---------------------------------------------------------------------------
+
+/** Internal factory — returns a brand-new isolated message store. */
+function createMessages() {
+  const acc = useDeltaAccumulator();
+  const messages = shallowRef(new Map<string, ShallowRef<MessageEntry>>());
+  const parts = new Map<string, ShallowRef<MessagePart>>();
 
 const roots = computed(() => {
   const result: MessageInfo[] = [];
@@ -436,7 +446,6 @@ function dispose() {
   for (const unsub of unsubs) unsub();
 }
 
-export function useMessages() {
   return {
     messages: readonly(messages),
     roots,
@@ -466,4 +475,37 @@ export function useMessages() {
     dispose,
     bindScope,
   };
+}
+
+export type UseMessages = ReturnType<typeof createMessages>;
+
+// Keyed cache: one message store per session ID.
+const messageStores = new Map<string, UseMessages>();
+
+/**
+ * Get (or create) the message store for `sessionId`.
+ *
+ * If called without an argument, returns a "default" instance for backwards
+ * compatibility with code that hasn't been migrated to multi-session yet.
+ */
+export function useMessages(sessionId = '__default__'): UseMessages {
+  let store = messageStores.get(sessionId);
+  if (!store) {
+    store = createMessages();
+    messageStores.set(sessionId, store);
+  }
+  return store;
+}
+
+/**
+ * Dispose and remove a session's message store from the cache.
+ * Call this when closing a tab to free memory.
+ */
+export function disposeMessages(sessionId: string) {
+  const store = messageStores.get(sessionId);
+  if (store) {
+    store.dispose();
+    store.reset();
+    messageStores.delete(sessionId);
+  }
 }

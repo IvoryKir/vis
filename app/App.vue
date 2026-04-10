@@ -24,6 +24,8 @@
           @open-settings="isSettingsOpen = true"
           @logout="handleLogout"
           @dropdown-closed="focusInput"
+          @tab-select="handleTabSelect"
+          @tab-close="handleTabClose"
         />
       </header>
       <div
@@ -345,6 +347,7 @@ import { useOpenCodeApi } from './composables/useOpenCodeApi';
 import { useReasoningWindows } from './composables/useReasoningWindows';
 import { useServerState } from './composables/useServerState';
 import { useSessionSelection } from './composables/useSessionSelection';
+import { useOpenSessions } from './composables/useOpenSessions';
 import { useSubagentWindows } from './composables/useSubagentWindows';
 import { renderWorkerHtml } from './utils/workerRenderer';
 import type { MessagePart, ReasoningPart, ToolPart } from './types/sse';
@@ -844,6 +847,8 @@ const {
   switchSession: switchSessionSelection,
   initialize: initializeSessionSelection,
 } = sessionSelection;
+
+const openSessions = useOpenSessions();
 
 function toSessionInfo(
   directory: string,
@@ -1350,6 +1355,54 @@ function replaceHomePrefix(path: string) {
 
 function sessionLabel(session: SessionInfo) {
   return session.title || session.slug || session.id;
+}
+
+/** Look up session title from server state by session ID. */
+function resolveSessionTitle(sessionId: string): string {
+  for (const project of Object.values(serverState.projects)) {
+    for (const sandbox of Object.values(project.sandboxes)) {
+      const session = sandbox.sessions[sessionId];
+      if (session) return session.title || session.slug || session.id;
+    }
+  }
+  return '';
+}
+
+function directoryBasename(path: string): string {
+  if (!path) return '';
+  const trimmed = path.endsWith('/') ? path.slice(0, -1) : path;
+  const idx = trimmed.lastIndexOf('/');
+  return idx >= 0 ? trimmed.slice(idx + 1) : trimmed;
+}
+
+/**
+ * Build a human-readable tab label: "repoName / sessionTitle".
+ * Falls back to just the session title if repo can't be resolved.
+ */
+function resolveTabLabel(sessionId: string, projectId?: string): string {
+  let repoName = '';
+  let sessionTitle = '';
+  for (const [pId, project] of Object.entries(serverState.projects)) {
+    if (projectId && pId !== projectId) continue;
+    for (const sandbox of Object.values(project.sandboxes)) {
+      const session = sandbox.sessions[sessionId];
+      if (session) {
+        // Repo name = branch name or last segment of directory
+        repoName = sandbox.branch || directoryBasename(sandbox.directory);
+        sessionTitle = session.title || session.slug || '';
+        break;
+      }
+    }
+    if (repoName) break;
+  }
+  if (!repoName && projectId) {
+    const project = serverState.projects[projectId];
+    if (project) repoName = directoryBasename(project.worktree);
+  }
+  if (sessionTitle && repoName) return `${repoName} / ${sessionTitle}`;
+  if (sessionTitle) return sessionTitle;
+  if (repoName) return repoName;
+  return sessionId.slice(0, 12);
 }
 
 function getSelectedWorktreeDirectory() {
@@ -2232,6 +2285,11 @@ async function createSessionInDirectory(directory: string) {
   const session = await openCodeApi.createSession(directory);
   if (!session?.id) return undefined;
   await switchSessionSelection(session.projectID, session.id);
+  openSessions.open({
+    id: session.id,
+    projectId: session.projectID,
+    title: resolveTabLabel(session.id, session.projectID),
+  });
   return session;
 }
 
@@ -2308,6 +2366,12 @@ async function createNewSession(): Promise<SessionInfo | undefined> {
     if (data && typeof data.id === 'string') {
       const nextProjectId = data.projectID;
       await switchSessionSelection(nextProjectId, data.id);
+      // Open a new tab for this session.
+      openSessions.open({
+        id: data.id,
+        projectId: nextProjectId,
+        title: resolveTabLabel(data.id, nextProjectId),
+      });
     }
     return data;
   } catch (error) {
@@ -2339,6 +2403,30 @@ function handleTopPanelSessionSelect(payload: {
     resolveProjectIdForDirectory(payload.worktree) ||
     selectedProjectId.value;
   void switchSessionSelection(projectId, payload.sessionId);
+  // Open/switch to this session in the tab bar.
+  openSessions.open({
+    id: payload.sessionId,
+    projectId,
+    title: resolveTabLabel(payload.sessionId, projectId),
+  });
+}
+
+/** Tab clicked in SessionTabBar — switch to that session. */
+function handleTabSelect(sessionId: string) {
+  const tab = openSessions.tabs.find((t) => t.id === sessionId);
+  if (!tab) return;
+  openSessions.activate(sessionId);
+  void switchSessionSelection(tab.projectId, sessionId);
+}
+
+/** Tab close button clicked — close the tab. */
+function handleTabClose(sessionId: string) {
+  openSessions.close(sessionId);
+  // If there are remaining tabs, switch to the new active one.
+  const active = openSessions.activeTab.value;
+  if (active) {
+    void switchSessionSelection(active.projectId, active.id);
+  }
 }
 
 function handleNotificationSessionSelect() {
@@ -2508,6 +2596,15 @@ async function bootstrapSelections() {
       await switchSessionSelection(initialProjectId, initialSessionId);
     } else {
       await initializeSessionSelection();
+    }
+
+    // Open the initial session as the first tab.
+    if (selectedSessionId.value && selectedProjectId.value) {
+      openSessions.open({
+        id: selectedSessionId.value,
+        projectId: selectedProjectId.value,
+        title: resolveTabLabel(selectedSessionId.value, selectedProjectId.value),
+      });
     }
 
     if (activeDirectory.value) {
@@ -5461,6 +5558,13 @@ onMounted(() => {
   globalEventUnsubscribers.push(
     ge.on('session.updated', () => {
       validateSelectedSession();
+      // Update tab titles when sessions get renamed by opencode.
+      for (const tab of openSessions.tabs) {
+        const label = resolveTabLabel(tab.id, tab.projectId);
+        if (label && label !== tab.title) {
+          openSessions.setTitle(tab.id, label);
+        }
+      }
     }),
   );
   globalEventUnsubscribers.push(

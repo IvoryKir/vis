@@ -15,7 +15,6 @@ export type AccumulatedMessage = {
   parts: Map<string, MessagePart>;
 };
 
-const messages = new Map<string, AccumulatedMessage>();
 
 function isComplete(info: MessageInfo): boolean {
   if (info.role !== 'assistant') return true;
@@ -26,6 +25,9 @@ function isComplete(info: MessageInfo): boolean {
 }
 
 export function useDeltaAccumulator() {
+  // Each accumulator instance has its own message Map — no shared state.
+  const messages = new Map<string, AccumulatedMessage>();
+
   function listen(ge: GlobalEvents): () => void {
     const offs: Array<() => void> = [];
 

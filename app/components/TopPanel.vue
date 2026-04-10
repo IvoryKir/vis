@@ -304,6 +304,10 @@
         </Dropdown>
       </div>
     </div>
+    <SessionTabBar
+      @select="$emit('tab-select', $event)"
+      @close="$emit('tab-close', $event)"
+    />
   </div>
 </template>
 
@@ -313,6 +317,7 @@ import { Icon } from '@iconify/vue';
 import Dropdown from './Dropdown.vue';
 import DropdownItem from './Dropdown/Item.vue';
 import DropdownSearch from './Dropdown/Search.vue';
+import SessionTabBar from './SessionTabBar.vue';
 
 declare const __GIT_REVISION__: string;
 const gitRevision = typeof __GIT_REVISION__ !== 'undefined' ? __GIT_REVISION__ : 'dev';
@@ -384,6 +389,8 @@ const emit = defineEmits<{
   (event: 'open-settings'): void;
   (event: 'logout'): void;
   (event: 'dropdown-closed'): void;
+  (event: 'tab-select', sessionId: string): void;
+  (event: 'tab-close', sessionId: string): void;
 }>();
 
 const menuOpen = ref(false);
