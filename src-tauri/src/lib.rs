@@ -106,6 +106,35 @@ fn inject_api_base(window: &WebviewWindow, url: &str) {
     }
 }
 
+/// Resolve the path to the `opencode` binary.
+///
+/// On macOS, GUI apps launched via Finder/Dock/Spotlight get a minimal PATH
+/// (typically just `/usr/bin:/bin:/usr/sbin:/sbin`). User-installed tools in
+/// `~/.opencode/bin`, `~/.local/bin`, or Homebrew/nix paths are invisible.
+/// We probe well-known locations first, then fall back to bare `"opencode"`.
+fn resolve_opencode_binary(home: &str) -> String {
+    use std::path::PathBuf;
+
+    let candidates = [
+        PathBuf::from(home).join(".opencode/bin/opencode"),
+        PathBuf::from(home).join(".local/bin/opencode"),
+        PathBuf::from("/usr/local/bin/opencode"),
+        PathBuf::from("/opt/homebrew/bin/opencode"),  // Apple Silicon Homebrew
+        PathBuf::from("/home/linuxbrew/.linuxbrew/bin/opencode"),
+    ];
+
+    for path in &candidates {
+        if path.is_file() {
+            return path.display().to_string();
+        }
+    }
+
+    // Fall back to bare name — works if opencode is on PATH (e.g. Linux
+    // terminal launch, or user has configured their environment properly).
+    "opencode".to_string()
+}
+
+
 /// Spawn `opencode serve` on a random free port and pipe stdout/stderr into
 /// the shell's own stderr so users can see what's happening.
 ///
@@ -125,25 +154,44 @@ fn spawn_opencode(app: &tauri::AppHandle, frontend_port: u16) -> Result<(), Stri
     // via the `x-opencode-directory` header, so the cwd only matters for
     // opencode's own config lookup and default project resolution.
     let home = std::env::var("HOME").unwrap_or_else(|_| "/".to_string());
-    // Wrap the spawn in `setsid` so opencode becomes the leader of a brand-
-    // new session (and therefore a new process group). This is the workaround
-    // for sst/opencode#20899: `opencode serve` does not forward SIGTERM to
-    // its children (MCP / LSP / bash), and Bun doesn't implement the
-    // `detached` child_process option. `setsid` creates a new session, then
-    // execs opencode — so the PID we get from `child.pid()` is setsid's PID,
-    // which becomes opencode's PID after exec. The session (and pgroup) is
-    // this same PID, meaning `killpg(pid, SIGKILL)` wipes the entire tree.
+
+    // Resolve the opencode binary path. On macOS, GUI apps launched from
+    // Finder/Dock inherit a minimal PATH that doesn't include ~/.opencode/bin
+    // or paths added in .zshrc/.bash_profile. We check well-known locations
+    // and fall back to bare "opencode" (hoping it's on PATH).
+    let opencode_bin = resolve_opencode_binary(&home);
+    eprintln!("[vis] using opencode binary: {opencode_bin}");
+
+    // On Linux, wrap the spawn in `setsid` so opencode becomes the leader
+    // of a new session/pgroup. This is the workaround for sst/opencode#20899:
+    // `opencode serve` does not forward SIGTERM to its children.
+    // On macOS, `setsid` doesn't exist — we spawn opencode directly and
+    // rely on killpg with the child's PID as pgroup leader (macOS creates a
+    // new pgroup for each child by default when spawned from a GUI app).
+    #[cfg(target_os = "linux")]
     let cmd = shell
         .command("setsid")
         .args([
-            "opencode",
+            opencode_bin.as_str(),
             "serve",
             "--hostname=127.0.0.1",
             "--port=0",
             "--cors",
             cors_origin.as_str(),
         ])
-        .current_dir(home);
+        .current_dir(&home);
+
+    #[cfg(not(target_os = "linux"))]
+    let cmd = shell
+        .command(&opencode_bin)
+        .args([
+            "serve",
+            "--hostname=127.0.0.1",
+            "--port=0",
+            "--cors",
+            cors_origin.as_str(),
+        ])
+        .current_dir(&home);
 
     let (mut rx, child) = cmd
         .spawn()
@@ -159,7 +207,7 @@ fn spawn_opencode(app: &tauri::AppHandle, frontend_port: u16) -> Result<(), Stri
             url: None,
         });
     }
-    eprintln!("[vis] spawned opencode pid={pid} (via setsid)");
+    eprintln!("[vis] spawned opencode pid={pid}");
 
     let app_handle = app.clone();
     tauri::async_runtime::spawn(async move {
