@@ -16,6 +16,12 @@
           "cmd": "opencode",
           "args": true,
           "sidecar": false
+        },
+        {
+          "name": "setsid",
+          "cmd": "setsid",
+          "args": true,
+          "sidecar": false
         }
       ]
     },
@@ -25,6 +31,12 @@
         {
           "name": "opencode",
           "cmd": "opencode",
+          "args": true,
+          "sidecar": false
+        },
+        {
+          "name": "setsid",
+          "cmd": "setsid",
           "args": true,
           "sidecar": false
         }
