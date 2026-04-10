@@ -1,4 +1,4 @@
-import { computed, ref, shallowReactive } from 'vue';
+import { computed, ref, shallowReactive, watch } from 'vue';
 
 export type SessionTabStatus = 'idle' | 'busy' | 'error';
 
@@ -15,6 +15,58 @@ export interface OpenSession {
   hasUnread: boolean;
 }
 
+// ---------------------------------------------------------------------------
+// localStorage persistence
+// ---------------------------------------------------------------------------
+
+const STORAGE_KEY = 'vis_open_sessions';
+
+interface PersistedTab {
+  id: string;
+  projectId: string;
+  title: string;
+}
+
+interface PersistedState {
+  tabs: PersistedTab[];
+  activeIndex: number;
+}
+
+function saveToStorage(state: PersistedState) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {
+    // Silently ignore — quota exceeded, SSR, etc.
+  }
+}
+
+function loadFromStorage(): PersistedState | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PersistedState;
+    if (!Array.isArray(parsed?.tabs)) return null;
+    // Validate each tab has required fields.
+    const validTabs = parsed.tabs.filter(
+      (t) => typeof t.id === 'string' && t.id &&
+             typeof t.projectId === 'string' &&
+             typeof t.title === 'string',
+    );
+    if (validTabs.length === 0) return null;
+    const idx = typeof parsed.activeIndex === 'number' ? parsed.activeIndex : 0;
+    return {
+      tabs: validTabs,
+      activeIndex: Math.max(0, Math.min(idx, validTabs.length - 1)),
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Module-level singleton state
+// ---------------------------------------------------------------------------
+
 /**
  * Manages the set of currently open session tabs.
  *
@@ -24,13 +76,50 @@ export interface OpenSession {
  * consumer (App.vue).
  *
  * Module-level singleton so every component sees the same tab state.
+ *
+ * Tab list is persisted to localStorage so it survives app restarts
+ * (important for the Tauri desktop shell where there's no browser
+ * session to keep state alive).
  */
 const tabs = shallowReactive<OpenSession[]>([]);
 const activeIndex = ref(0);
 
+// Restore from localStorage on module load.
+const restored = loadFromStorage();
+if (restored) {
+  for (const t of restored.tabs) {
+    tabs.push({
+      id: t.id,
+      projectId: t.projectId,
+      title: t.title,
+      status: 'idle',
+      hasUnread: false,
+    });
+  }
+  activeIndex.value = restored.activeIndex;
+}
+
 const activeTab = computed(() => tabs[activeIndex.value] ?? null);
 const activeSessionId = computed(() => activeTab.value?.id ?? '');
 const activeProjectId = computed(() => activeTab.value?.projectId ?? '');
+
+// ---------------------------------------------------------------------------
+// Persist helpers — called after every mutation.
+// ---------------------------------------------------------------------------
+
+function persist() {
+  saveToStorage({
+    tabs: tabs.map((t) => ({ id: t.id, projectId: t.projectId, title: t.title })),
+    activeIndex: activeIndex.value,
+  });
+}
+
+// Also persist when activeIndex changes (e.g. tab click without open/close).
+watch(activeIndex, persist);
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
 
 function findIndex(sessionId: string): number {
   return tabs.findIndex((t) => t.id === sessionId);
@@ -55,6 +144,7 @@ function open(session: Pick<OpenSession, 'id' | 'projectId' | 'title'>): number 
   };
   tabs.push(tab);
   activeIndex.value = tabs.length - 1;
+  persist();
   return activeIndex.value;
 }
 
@@ -67,13 +157,12 @@ function close(sessionId: string) {
   tabs.splice(idx, 1);
   if (tabs.length === 0) {
     activeIndex.value = 0;
-    return;
-  }
-  if (activeIndex.value >= tabs.length) {
+  } else if (activeIndex.value >= tabs.length) {
     activeIndex.value = tabs.length - 1;
   } else if (activeIndex.value > idx) {
     activeIndex.value -= 1;
   }
+  persist();
 }
 
 /** Switch to an already-open tab by session ID. */
@@ -97,7 +186,10 @@ function setUnread(sessionId: string, hasUnread: boolean) {
 /** Update the title of a tab (e.g. when session description changes). */
 function setTitle(sessionId: string, title: string) {
   const tab = tabs.find((t) => t.id === sessionId);
-  if (tab) tab.title = title;
+  if (tab) {
+    tab.title = title;
+    persist();
+  }
 }
 
 /** Reorder tabs (for future drag-and-drop). */
@@ -112,6 +204,7 @@ function reorder(fromIndex: number, toIndex: number) {
     const newIdx = findIndex(activeId);
     if (newIdx >= 0) activeIndex.value = newIdx;
   }
+  persist();
 }
 
 export function useOpenSessions() {

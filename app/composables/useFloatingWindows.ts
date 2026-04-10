@@ -1,4 +1,4 @@
-import { reactive, computed, markRaw, onUnmounted, type Component } from 'vue';
+import { reactive, computed, markRaw, onUnmounted, ref, type Component } from 'vue';
 import { renderWorkerHtml } from '../utils/workerRenderer';
 
 export interface FloatingWindowEntry {
@@ -33,7 +33,9 @@ export interface FloatingWindowEntry {
   beforeClose?: (el: HTMLElement) => Promise<void>;
   afterClose?: () => void;
   onResize?: (width: number, height: number) => void;
-}
+  /** Session that owns this window. Undefined = global (shown in all sessions). */
+  sessionId?: string;
+  }
 
 export type Extent = { width: number; height: number };
 
@@ -120,7 +122,31 @@ function resolveExpiresAt(
 
 export function useFloatingWindows() {
   const entriesMap = reactive(new Map<string, FloatingWindowEntry>());
-  const entries = computed(() => [...entriesMap.values()].filter((e) => e.isReady));
+
+  // Session-aware filtering: only show windows belonging to the active
+  // session (or global windows like shells, permissions, questions).
+  const _filterSessionId = ref('');
+
+  function setSessionFilter(sessionId: string) {
+    _filterSessionId.value = sessionId;
+  }
+
+  /** Returns true if an entry should be visible given the active session filter. */
+  function isEntryVisible(entry: FloatingWindowEntry): boolean {
+    if (!entry.isReady) return false;
+    // Global windows (no sessionId) are always visible.
+    if (!entry.sessionId) return true;
+    // Shell, permission and question windows are always visible.
+    if (entry.key.startsWith('shell:') ||
+        entry.key.startsWith('permission:') ||
+        entry.key.startsWith('question:')) return true;
+    // When no filter is set, show everything.
+    if (!_filterSessionId.value) return true;
+    // Otherwise, only show windows that match the active session.
+    return entry.sessionId === _filterSessionId.value;
+  }
+
+  const entries = computed(() => [...entriesMap.values()].filter(isEntryVisible));
   let extent: Extent = {
     width: typeof window !== 'undefined' ? window.innerWidth : 1920,
     height: typeof window !== 'undefined' ? window.innerHeight : 1080,
@@ -175,12 +201,20 @@ export function useFloatingWindows() {
   async function open(key: string, opts: Partial<FloatingWindowEntry>): Promise<void> {
     const existing = entriesMap.get(key);
 
+    // Auto-tag with active session if not explicitly set and not a global window.
+    const isGlobalWindow = key.startsWith('shell:') ||
+      key.startsWith('permission:') ||
+      key.startsWith('question:');
+    const effectiveSessionId = opts.sessionId ?? existing?.sessionId ??
+      (isGlobalWindow ? undefined : (_filterSessionId.value || undefined));
+
     // Merge with defaults and existing
     const merged: FloatingWindowEntry = {
       ...DEFAULT_OPTS,
       ...existing,
       ...opts,
       key,
+      sessionId: effectiveSessionId,
       time: Date.now(),
       zIndex: existing
         ? existing.zIndex
@@ -428,6 +462,7 @@ export function useFloatingWindows() {
     has,
     get,
     setExtent,
+    setSessionFilter,
     getExtent,
   };
 }
