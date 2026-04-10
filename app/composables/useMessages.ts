@@ -1,4 +1,4 @@
-import { computed, readonly, shallowRef, triggerRef } from 'vue';
+import { computed, readonly, ref, shallowRef, triggerRef } from 'vue';
 import type { ShallowRef } from 'vue';
 import type {
   MessageAttachment,
@@ -128,10 +128,15 @@ function byTimeThenId(a: MessageInfo, b: MessageInfo): number {
 // ---------------------------------------------------------------------------
 // Per-session message store factory.
 //
-// Before Phase 2 this was module-level singleton state. Now each call to
-// `createMessages()` returns a fresh, isolated store. `useMessages(sessionId)`
-// below maintains a keyed cache so that the same store is returned for the
-// same session ID throughout the app lifetime.
+// Each call to `createMessages()` returns a fresh, isolated store.
+// `useMessages(sessionId)` maintains a keyed cache so that the same store
+// is returned for the same session ID throughout the app lifetime.
+//
+// `useMessages()` without an argument returns a *proxy* that delegates to
+// whichever session is currently active (set via `setActiveSession()`).
+// This allows child components (OutputPanel, ThreadBlock, InputPanel) to
+// call `useMessages()` exactly as before and automatically get data from
+// the correct session — no prop drilling needed.
 // ---------------------------------------------------------------------------
 
 /** Internal factory — returns a brand-new isolated message store. */
@@ -479,22 +484,113 @@ function dispose() {
 
 export type UseMessages = ReturnType<typeof createMessages>;
 
-// Keyed cache: one message store per session ID.
+// ---------------------------------------------------------------------------
+// Module-level state
+// ---------------------------------------------------------------------------
+
+/** Keyed cache: one message store per session ID. */
 const messageStores = new Map<string, UseMessages>();
 
+/** The currently active session ID. When changed, `useMessages()` (no args)
+ *  returns the store for this session. This ref is the backbone of the
+ *  "switching = instant, no re-fetch" behaviour. */
+const _activeSessionId = ref('');
+
 /**
- * Get (or create) the message store for `sessionId`.
- *
- * If called without an argument, returns a "default" instance for backwards
- * compatibility with code that hasn't been migrated to multi-session yet.
+ * Set which session ID is "active". After this call, every component that
+ * called `useMessages()` without an explicit session ID will transparently
+ * see data from the new session's store.
  */
-export function useMessages(sessionId = '__default__'): UseMessages {
+export function setActiveSession(sessionId: string) {
+  _activeSessionId.value = sessionId;
+}
+
+/**
+ * Get (or create) the message store for an *explicit* session ID.
+ * Use this when you need to address a specific session (e.g. loading
+ * history into a background tab).
+ */
+export function useSessionMessages(sessionId: string): UseMessages {
   let store = messageStores.get(sessionId);
   if (!store) {
     store = createMessages();
     messageStores.set(sessionId, store);
   }
   return store;
+}
+
+// ---------------------------------------------------------------------------
+// Active-session proxy
+//
+// `useMessages()` (no arguments) returns a stable object whose methods and
+// computed refs delegate to whichever per-session store is currently active.
+// Child components (OutputPanel, ThreadBlock, InputPanel) call this once at
+// setup time and never need to know about session switching.
+// ---------------------------------------------------------------------------
+
+/** The underlying store for the active session, recomputed when _activeSessionId changes. */
+const _activeStore = computed<UseMessages>(() => {
+  const id = _activeSessionId.value;
+  if (!id) return useSessionMessages('__empty__');
+  return useSessionMessages(id);
+});
+
+/** Proxy roots: delegates to the active store's roots. */
+const _proxyRoots = computed(() => _activeStore.value.roots.value);
+const _proxyStreaming = computed(() => _activeStore.value.streaming.value);
+const _proxyMessages = computed(() => _activeStore.value.messages.value);
+
+const activeProxy: UseMessages = {
+  messages: _proxyMessages as any,
+  roots: _proxyRoots as any,
+  streaming: _proxyStreaming as any,
+  // All method calls delegate to the currently active store at call time.
+  get: (id) => _activeStore.value.get(id),
+  getParts: (id) => _activeStore.value.getParts(id),
+  getPartsByType: ((id: string, type: string) =>
+    _activeStore.value.getPartsByType(id, type as any)) as any,
+  hasTextContent: (id) => _activeStore.value.hasTextContent(id),
+  getTextContent: (id) => _activeStore.value.getTextContent(id),
+  getImageAttachments: (id) => _activeStore.value.getImageAttachments(id),
+  getUsage: (id) => _activeStore.value.getUsage(id),
+  getStatus: (id) => _activeStore.value.getStatus(id),
+  getError: (id) => _activeStore.value.getError(id),
+  getDiffs: (id) => _activeStore.value.getDiffs(id),
+  getModelPath: (id) => _activeStore.value.getModelPath(id),
+  getProviderId: (info) => _activeStore.value.getProviderId(info),
+  getModelId: (info) => _activeStore.value.getModelId(info),
+  getTime: (id) => _activeStore.value.getTime(id),
+  getCompletedTime: (id) => _activeStore.value.getCompletedTime(id),
+  getChildren: (id) => _activeStore.value.getChildren(id),
+  getThread: (id) => _activeStore.value.getThread(id),
+  getFinalAnswer: (id) => _activeStore.value.getFinalAnswer(id),
+  updateMessage: (info, notify) => _activeStore.value.updateMessage(info, notify),
+  updatePart: (part, notify) => _activeStore.value.updatePart(part, notify),
+  loadHistory: (entries) => _activeStore.value.loadHistory(entries),
+  reset: () => _activeStore.value.reset(),
+  dispose: () => _activeStore.value.dispose(),
+  bindScope: (scope) => _activeStore.value.bindScope(scope),
+};
+
+/**
+ * Get the message store for the currently active session.
+ *
+ * **Without arguments**: returns the active-session proxy. All child
+ * components (OutputPanel, ThreadBlock, InputPanel) should use this form.
+ * The proxy delegates transparently to whichever session is active, so
+ * switching sessions is instant — no DOM teardown, no re-fetch.
+ *
+ * **With a session ID**: returns the concrete per-session store (same as
+ * `useSessionMessages`). Use this when you need to address a specific
+ * session by ID (e.g. loading history in the background).
+ */
+export function useMessages(): UseMessages;
+export function useMessages(sessionId: string): UseMessages;
+export function useMessages(sessionId?: string): UseMessages {
+  if (sessionId !== undefined) {
+    return useSessionMessages(sessionId);
+  }
+  return activeProxy;
 }
 
 /**

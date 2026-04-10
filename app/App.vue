@@ -81,7 +81,6 @@
                 <div class="output-split">
                   <OutputPanel
                     ref="outputPanelRef"
-                    :key="selectedSessionId"
                     class="output-panel"
                     :project-name="currentProjectName"
                     :project-color="currentProjectColor"
@@ -342,7 +341,7 @@ import { useQuestions, type QuestionRequest, type QuestionInfo } from './composa
 import { useTodos, type TodoItem } from './composables/useTodos';
 import { useDeltaAccumulator } from './composables/useDeltaAccumulator';
 import { useGlobalEvents } from './composables/useGlobalEvents';
-import { useMessages } from './composables/useMessages';
+import { useMessages, useSessionMessages, setActiveSession } from './composables/useMessages';
 import { useOpenCodeApi } from './composables/useOpenCodeApi';
 import { useReasoningWindows } from './composables/useReasoningWindows';
 import { useServerState } from './composables/useServerState';
@@ -2508,7 +2507,7 @@ async function handleRevertMessage(payload: { sessionId: string; messageId: stri
       directory: activeDirectory.value.trim() || undefined,
     });
     sendStatus.value = 'Reverted.';
-    if (selectedSessionId.value === payload.sessionId) void reloadSelectedSessionState();
+    if (selectedSessionId.value === payload.sessionId) void reloadSelectedSessionState(true);
   } catch (error) {
     sessionError.value = `Session revert failed: ${toErrorMessage(error)}`;
   }
@@ -2903,7 +2902,10 @@ async function fetchHistory(sessionId: string, isSubagentMessage = false) {
       if (selectedSessionId.value !== sessionId) return;
       if (getSelectedWorktreeDirectory() !== requestedDirectory) return;
     }
-    msg.loadHistory(data);
+    // Load into the per-session store (not the proxy) so data persists
+    // even if the user switches away before the fetch completes.
+    const sessionStore = useSessionMessages(sessionId);
+    sessionStore.loadHistory(data);
 
     data.forEach((message) => {
       const info = message.info as Record<string, unknown> | undefined;
@@ -4062,22 +4064,45 @@ watch(
   { immediate: true },
 );
 
-async function reloadSelectedSessionState() {
+async function reloadSelectedSessionState(forceRefresh = false) {
   if (selectedSessionId.value && isBootstrapping.value && !activeDirectory.value) {
     return;
   }
-  fw.closeAll({ exclude: (key) => key.startsWith('shell:') });
-  msg.reset();
+
+  const sessionId = selectedSessionId.value;
+
+  // ---- Switch the active-session pointer so the proxy + all child
+  // ---- components instantly see the new session's cached data.
+  setActiveSession(sessionId);
+
+  // Filter floating windows to show only those belonging to this session.
+  fw.setSessionFilter(sessionId);
+
+  // Bind SSE events to this session's per-session store so real-time
+  // updates land in the right place (even when it's a background tab).
+  if (sessionId) {
+    const sessionStore = useSessionMessages(sessionId);
+    sessionStore.bindScope(mainSessionScope);
+  }
+
+  // Scroll / follow state is per-view, reset on every switch.
   resetFollow();
-  reasoning.reset();
-  subagentWindows.reset();
   retryStatus.value = null;
-  todosBySessionId.value = {};
-  todoLoadingBySessionId.value = {};
-  todoErrorBySessionId.value = {};
-  if (selectedSessionId.value) {
-    const sessionId = selectedSessionId.value;
-    await fetchHistory(sessionId);
+
+  if (sessionId) {
+    const sessionStore = useSessionMessages(sessionId);
+    const alreadyLoaded = sessionStore.roots.value.length > 0;
+
+    if (forceRefresh) {
+      // Forced reload: wipe old data first, then re-fetch.
+      sessionStore.reset();
+      await fetchHistory(sessionId);
+    } else if (!alreadyLoaded) {
+      // First time visiting this session — fetch history from server.
+      await fetchHistory(sessionId);
+    }
+    // If already loaded + not forced, the proxy immediately shows cached data.
+
     if (msg.roots.value.length === 0) {
       scrollOutputPanelToBottom(false);
     }
@@ -4241,7 +4266,9 @@ deltaAccumulator.listen(ge);
 const sessionScope = ge.session(selectedSessionId, sessionParentRecord);
 const mainSessionScope = ge.mainSession(selectedSessionId);
 const msg = useMessages();
-msg.bindScope(mainSessionScope);
+// NOTE: msg.bindScope is NOT called here — it's done per-session in
+// reloadSelectedSessionState so that each per-session store receives
+// its own SSE events. The proxy (`msg`) delegates to the active store.
 reasoning.bindScope(sessionScope);
 subagentWindows.bindScope(sessionScope);
 
