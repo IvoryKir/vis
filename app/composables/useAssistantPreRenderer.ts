@@ -16,17 +16,27 @@ type UseAssistantPreRendererOptions = {
   onRendered: (renderKey: string) => void;
 };
 
+// ---------------------------------------------------------------------------
+// Module-level caches — survive across session switches.
+//
+// Previously these were per-instance of useAssistantPreRenderer. When the
+// active-session proxy switched visibleRoots, every message from the new
+// session had a cache miss and was re-submitted to the render Web Worker.
+// With 50+ messages this caused multi-second delays.
+//
+// By making the caches module-level, switching back to a previously visited
+// session finds all HTML already rendered — instant display.
+// ---------------------------------------------------------------------------
+const assistantHtmlCache = reactive(new Map<string, string>());
+const deferredKeyCache = reactive(new Map<string, string>());
+const submitSeqMap = new Map<string, number>();
+const appliedSeqMap = new Map<string, number>();
+const lastSubmitted = new Map<
+  string,
+  { answerId: string; content: string; theme: string; fileCacheVersion: number }
+>();
+
 export function useAssistantPreRenderer(options: UseAssistantPreRendererOptions) {
-  const assistantHtmlCache = reactive(new Map<string, string>());
-  const deferredKeyCache = reactive(new Map<string, string>());
-
-  const submitSeqMap = new Map<string, number>();
-  const appliedSeqMap = new Map<string, number>();
-  const lastSubmitted = new Map<
-    string,
-    { answerId: string; content: string; theme: string; fileCacheVersion: number }
-  >();
-
   function submitAssistantRender(rootId: string, answerId: string, content: string) {
     const seq = (submitSeqMap.get(rootId) ?? 0) + 1;
     submitSeqMap.set(rootId, seq);

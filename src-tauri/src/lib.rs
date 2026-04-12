@@ -440,6 +440,20 @@ fn install_desktop_entry() {
 }
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // WebKitGTK compositing/DMA-BUF performance workaround.
+    // Paradoxically, disabling HW-accelerated compositing often *improves*
+    // rendering performance in WebKitGTK — confirmed across Tauri, Wails,
+    // GitButler and dozens of GitHub issues. The DMA-BUF renderer has known
+    // bugs with certain GPU drivers and causes high CPU usage even on AMD/Intel.
+    // See: tauri-apps/tauri#9394, gitbutlerapp/gitbutler#11602, wry#890
+    #[cfg(target_os = "linux")]
+    {
+        // SAFETY: called before any other threads are spawned.
+        unsafe {
+            std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
+            std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        }
+    }
     // Pick the port for the embedded frontend HTTP server.
     //
     // CRITICAL: We use a FIXED preferred port so that WebKitGTK (Linux)
@@ -509,6 +523,27 @@ pub fn run() {
                 .center()
                 .visible(false)
                 .build()?;
+
+            // Disable HW acceleration via WebKitGTK settings API.
+            // Environment variables (WEBKIT_DISABLE_COMPOSITING_MODE) are unreliable
+            // when the webview is created via plugin-localhost. Using with_webview
+            // gives us direct access to the underlying webkit2gtk::WebView.
+            #[cfg(target_os = "linux")]
+            {
+                use webkit2gtk::{SettingsExt, WebViewExt};
+                let main_window = app.get_webview_window("main").expect("main window");
+                main_window.with_webview(move |webview| {
+                    let wv = webview.inner();
+                    if let Some(settings) = WebViewExt::settings(&wv) {
+                        settings.set_hardware_acceleration_policy(
+                            webkit2gtk::HardwareAccelerationPolicy::Never,
+                        );
+                        // Also enable page cache for faster back/forward
+                        settings.set_enable_page_cache(true);
+                        eprintln!("[vis] WebKitGTK: HW accel=NEVER, page_cache=ON");
+                    }
+                }).ok();
+            }
 
             // Install signal handlers on POSIX so Ctrl+C in the launching
             // terminal or a `kill` from the OS takes opencode down with us.

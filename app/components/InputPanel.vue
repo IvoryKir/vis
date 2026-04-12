@@ -1115,10 +1115,9 @@ const inputMessageStyle = computed(() => {
 :deep(.input-dropdown-popup) {
   /* Always open upward since input toolbar is at the bottom */
   top: auto;
-  bottom: anchor(top);
+  bottom: 100%;
   margin-top: 0;
   margin-bottom: 6px;
-  position-try-fallbacks: none;
   max-height: 280px;
   outline: none;
 }
@@ -1369,9 +1368,9 @@ const inputMessageStyle = computed(() => {
 }
 
 :deep(.command-popup) {
-  /* Open upward instead of downward */
+  /* Open upward instead of downward. */
   top: auto;
-  bottom: anchor(top);
+  bottom: 100%;
   margin-top: 0;
   margin-bottom: 8px;
   max-height: 220px;
@@ -1417,7 +1416,7 @@ const inputMessageStyle = computed(() => {
 :deep(.history-popup) {
   /* Open upward instead of downward */
   top: auto;
-  bottom: anchor(top);
+  bottom: 100%;
   margin-top: 0;
   margin-bottom: 6px;
   max-height: 50vh;

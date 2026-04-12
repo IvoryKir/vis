@@ -112,7 +112,10 @@ const root = ref<HTMLElement | null>(null);
 const menu = ref<HTMLElement | null>(null);
 const isActive = ref(props.open ?? false);
 const candidateValues = ref<T[]>([]);
-const anchorName = `--ui-dropdown-anchor-${Math.random().toString(36).slice(2, 10)}`;
+// CSS Anchor Positioning is broken in WebKitGTK (Tauri on Linux) despite
+// CSS.supports() returning true and even runtime probes passing — scoped
+// styles + dynamic anchor names cause silent failure. All dropdown
+// positioning is done via JS (getBoundingClientRect + position:fixed).
 
 const searchResults = ref<unknown[]>([]);
 const searchLoading = ref(false);
@@ -120,13 +123,34 @@ let searchController: AbortController | null = null;
 let searchTimer: ReturnType<typeof setTimeout> | null = null;
 let lastSearchQuery: string | undefined;
 
-const rootStyle = computed<StyleValue>(() => ({
-  anchorName,
-}));
+const rootStyle = computed<StyleValue>(() => ({}));
 
-const menuStyle = computed<StyleValue>(() => ({
-  positionAnchor: anchorName,
-}));
+/** JS fallback positioning: place menu below (or above) the root element. */
+function computeFallbackPosition(): Record<string, string> {
+  if (!root.value) return {};
+  const rect = root.value.getBoundingClientRect();
+  const viewH = window.innerHeight;
+  const spaceBelow = viewH - rect.bottom;
+  const spaceAbove = rect.top;
+  // If more space above (or popup near bottom of screen), flip upward.
+  const flipUp = spaceAbove > spaceBelow && spaceBelow < 300;
+  const style: Record<string, string> = {
+    position: 'fixed',
+    left: `${rect.left}px`,
+    width: `${rect.width}px`,
+  };
+  if (flipUp) {
+    style.bottom = `${viewH - rect.top + 6}px`;
+  } else {
+    style.top = `${rect.bottom + 6}px`;
+  }
+  return style;
+}
+
+const menuStyle = computed<StyleValue>(() => {
+  if (!isActive.value) return {};
+  return computeFallbackPosition();
+});
 
 const displayLabel = computed(() => {
   if (props.label) return props.label;
@@ -466,14 +490,14 @@ defineExpose({ moveHighlight, selectHighlighted, updateSearch, clearHighlight })
 }
 
 .ui-dropdown-menu {
-  position: fixed;
-  top: anchor(bottom);
-  left: anchor(left);
+  /* Fallback positioning for all engines. */
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 100%;
   margin-top: 6px;
-  width: anchor-size(width);
   max-width: calc(100vw - 16px);
   max-height: 60vh;
-  position-try-fallbacks: flip-block;
   background: color-mix(in srgb, var(--bg-surface-0) 98%, transparent);
   border: 1px solid var(--border-color);
   border-radius: 10px;
@@ -483,6 +507,7 @@ defineExpose({ moveHighlight, selectHighlighted, updateSearch, clearHighlight })
   overflow: auto;
   z-index: 120;
 }
+
 
 .ui-dropdown-menu:not(.is-open) {
   visibility: hidden;

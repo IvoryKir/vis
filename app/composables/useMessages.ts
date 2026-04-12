@@ -189,6 +189,53 @@ const childrenByParent = computed(() => {
   return index;
 });
 
+// Cached thread/finalAnswer maps — computed once, reused by getThread/getFinalAnswer.
+// This eliminates the O(n²) BFS + shift() on every call, which is the main
+// performance bottleneck on JavaScriptCore (WebKitGTK).
+const threadCache = computed(() => {
+  const cache = new Map<string, MessageInfo[]>();
+  const children = childrenByParent.value;
+  for (const root of roots.value) {
+    const result: MessageInfo[] = [];
+    const queue: string[] = [root.id];
+    let qi = 0; // index-based BFS, no shift()
+    const visited = new Set<string>();
+    while (qi < queue.length) {
+      const current = queue[qi++];
+      if (visited.has(current)) continue;
+      visited.add(current);
+      const messageRef = messages.value.get(current);
+      const info = messageRef?.value.info;
+      if (!info) continue;
+      result.push(info);
+      const kids = children.get(current);
+      if (kids) for (const kid of kids) queue.push(kid.id);
+    }
+    cache.set(root.id, result.sort(byTimeThenId));
+  }
+  return cache;
+});
+
+const finalAnswerCache = computed(() => {
+  const cache = new Map<string, MessageInfo | undefined>();
+  for (const [rootId, thread] of threadCache.value) {
+    let best: MessageInfo | undefined;
+    for (const msg of thread) {
+      if (msg.role !== 'assistant') continue;
+      // Check hasTextContent inline to avoid per-call overhead.
+      const messageRef = messages.value.get(msg.id);
+      if (!messageRef) continue;
+      let hasText = false;
+      for (const partRef of messageRef.value.parts) {
+        if (partRef.value.type === 'text' && partRef.value.text) { hasText = true; break; }
+      }
+      if (hasText) best = msg;
+    }
+    cache.set(rootId, best);
+  }
+  return cache;
+});
+
 function ensureMessage(id: string, notifyCollection = true): ShallowRef<MessageEntry> {
   let ref = messages.value.get(id);
   if (ref) return ref;
@@ -228,6 +275,11 @@ const unsubs: Array<() => void> = [];
 function bindScope(scope: SessionScope) {
   for (const unsub of unsubs) unsub();
   unsubs.length = 0;
+
+  // Connect the delta accumulator to the same scoped SSE stream so it
+  // accumulates token-by-token deltas. Without this the acc is empty and
+  // the delta handler below always returns early → no token streaming.
+  unsubs.push(acc.listen(scope));
 
   unsubs.push(
     scope.on('message.part.updated', (packet: MessagePartUpdatedPacket) => {
@@ -372,30 +424,39 @@ function getChildren(parentId: string): MessageInfo[] {
 }
 
 function getThread(rootId: string): MessageInfo[] {
+  // Use precomputed cache when available (covers all root messages).
+  const cached = threadCache.value.get(rootId);
+  if (cached) return cached;
+  // Fallback for non-root messages (e.g. subagent threads).
   const root = get(rootId);
   if (!root) return [];
   const result: MessageInfo[] = [];
   const queue: string[] = [rootId];
+  let qi = 0;
   const visited = new Set<string>();
-  while (queue.length > 0) {
-    const current = queue.shift();
-    if (!current || visited.has(current)) continue;
+  while (qi < queue.length) {
+    const current = queue[qi++];
+    if (visited.has(current)) continue;
     visited.add(current);
     const info = get(current);
     if (!info) continue;
     result.push(info);
-    const children = getChildren(current);
-    for (const child of children) queue.push(child.id);
+    const kids = getChildren(current);
+    for (const child of kids) queue.push(child.id);
   }
   return result.sort(byTimeThenId);
 }
 
 function getFinalAnswer(rootId: string): MessageInfo | undefined {
+  // Use precomputed cache when available.
+  if (finalAnswerCache.value.has(rootId)) return finalAnswerCache.value.get(rootId);
+  // Fallback.
   const thread = getThread(rootId);
-  const assistants = thread
-    .filter((message) => message.role === 'assistant' && hasTextContent(message.id))
-    .sort(byTimeThenId);
-  return assistants[assistants.length - 1];
+  let best: MessageInfo | undefined;
+  for (const m of thread) {
+    if (m.role === 'assistant' && hasTextContent(m.id)) best = m;
+  }
+  return best;
 }
 
 function loadHistory(entries: unknown[]) {
@@ -535,7 +596,6 @@ const _activeStore = computed<UseMessages>(() => {
   return useSessionMessages(id);
 });
 
-/** Proxy roots: delegates to the active store's roots. */
 const _proxyRoots = computed(() => _activeStore.value.roots.value);
 const _proxyStreaming = computed(() => _activeStore.value.streaming.value);
 const _proxyMessages = computed(() => _activeStore.value.messages.value);

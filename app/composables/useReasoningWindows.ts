@@ -220,6 +220,9 @@ export function useReasoningWindows(options: UseReasoningWindowsOptions) {
     unsubs.length = 0;
     boundScope = scope;
 
+    // Connect delta accumulator so token-level streaming works.
+    unsubs.push(acc.listen(scope));
+
     unsubs.push(
       scope.on('message.part.updated', (packet: MessagePartUpdatedPacket) => {
         handleReasoningPart(packet.part);

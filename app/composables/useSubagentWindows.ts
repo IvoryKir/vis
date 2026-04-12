@@ -156,6 +156,8 @@ export function useSubagentWindows(options: UseSubagentWindowsOptions) {
     unsubs.length = 0;
     boundScope = scope;
 
+    // Connect delta accumulator so token-level streaming works.
+    unsubs.push(acc.listen(scope));
     unsubs.push(
       scope.on('message.part.updated', (packet: MessagePartUpdatedPacket) => {
         handleTextPart(packet.part);

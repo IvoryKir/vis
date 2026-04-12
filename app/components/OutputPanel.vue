@@ -114,6 +114,7 @@ const props = defineProps<{
   } | null;
 }>();
 
+
 const emit = defineEmits<{
   (event: 'scroll'): void;
   (event: 'wheel', eventArg: WheelEvent): void;
@@ -363,6 +364,7 @@ defineExpose({ panelEl });
   min-height: 0;
   flex: 1 1 auto;
 }
+
 
 .output-panel-content {
   display: flex;

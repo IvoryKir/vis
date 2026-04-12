@@ -634,6 +634,7 @@ watch(suppressAutoWindows, (suppressed) => {
 const outputEl = ref<HTMLElement | null>(null);
 const inputEl = ref<HTMLElement | null>(null);
 const toolWindowCanvasEl = ref<HTMLDivElement | null>(null);
+
 const outputPanelRef = ref<{ panelEl: HTMLDivElement | null } | null>(null);
 const topPanelRef = ref<{
   openSessionDropdown: () => void;
@@ -4070,7 +4071,6 @@ async function reloadSelectedSessionState(forceRefresh = false) {
   }
 
   const sessionId = selectedSessionId.value;
-
   // ---- Switch the active-session pointer so the proxy + all child
   // ---- components instantly see the new session's cached data.
   setActiveSession(sessionId);
