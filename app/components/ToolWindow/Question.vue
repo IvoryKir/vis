@@ -291,7 +291,7 @@ function emitReject() {
 }
 
 .question-title {
-  font-size: 13px;
+  font-size: var(--vis-font-size, 13px);
   font-weight: 700;
 }
 

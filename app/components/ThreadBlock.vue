@@ -79,17 +79,34 @@
               @click="emit('open-image', { url: item.url, filename: item.filename })"
             />
           </div>
-          <button
-            v-if="showHistoryButton(root)"
-            type="button"
-            class="ib-action ib-action-history"
-            :title="`${getHistoryEntries(root).length} entries - click to view history`"
-            @click="showThreadHistory(root)"
-          >
-            History ({{ getHistoryEntries(root).length }})
-          </button>
+          <div v-if="showHistoryButton(root)" class="ib-actions-row">
+            <button
+              type="button"
+              class="ib-action ib-action-expand"
+              :title="inlineHistoryExpanded ? 'Collapse inline history' : 'Expand inline history'"
+              @click="inlineHistoryExpanded = !inlineHistoryExpanded"
+            >
+              {{ inlineHistoryExpanded ? '▾ Collapse' : '▸ Expand' }} ({{ getHistoryEntries(root).length }})
+            </button>
+            <button
+              type="button"
+              class="ib-action ib-action-history"
+              :title="`${getHistoryEntries(root).length} entries - open in window`"
+              @click="showThreadHistory(root)"
+            >
+              History ↗
+            </button>
+          </div>
         </div>
       </Transition>
+      <div v-if="inlineHistoryExpanded && inlineHistoryEntries.length > 0" class="ib-inline-history">
+        <ThreadHistoryContent
+          :entries="inlineHistoryEntries"
+          :theme="theme"
+          :on-tool-click="(part: ToolPart) => emit('open-history-tool', { part })"
+          :on-reasoning-click="(part: any) => emit('open-history-reasoning', { part })"
+        />
+      </div>
     </div>
 
     <div v-if="!isRevertedPreview && getThreadError(root)" class="ib-error-bar">
@@ -112,10 +129,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, Transition } from 'vue';
+import { computed, ref, Transition } from 'vue';
 import MessageViewer from './MessageViewer.vue';
 import ThreadFooter from './ThreadFooter.vue';
 import ThreadTarget from './ThreadTarget.vue';
+import ThreadHistoryContent from './ThreadHistoryContent.vue';
 import { useMessages } from '../composables/useMessages';
 import type {
   HistoryEntry,
@@ -162,9 +180,54 @@ const emit = defineEmits<{
   (event: 'open-image', payload: { url: string; filename: string }): void;
   (event: 'show-thread-history', payload: { entries: HistoryWindowEntry[] }): void;
   (event: 'message-rendered', renderKey: string): void;
+  (event: 'open-history-tool', payload: { part: ToolPart }): void;
+  (event: 'open-history-reasoning', payload: { part: import('../types/sse').ReasoningPart }): void;
 }>();
 
 const msg = useMessages();
+const inlineHistoryExpanded = ref(false);
+
+const inlineHistoryEntries = computed<HistoryWindowEntry[]>(() => {
+  if (!inlineHistoryExpanded.value) return [];
+  return getHistoryEntries(props.root).map((entry) => {
+    if (entry.kind === 'message') {
+      return {
+        key: getHistoryEntryKey(entry),
+        kind: 'message',
+        content: getMessageContent(entry.message),
+        time: entry.time,
+        agent:
+          entry.message.role === 'assistant' && 'agent' in entry.message && entry.message.agent
+            ? entry.message.agent
+            : undefined,
+      } satisfies HistoryWindowEntry;
+    }
+    if (entry.kind === 'reasoning') {
+      return {
+        key: getHistoryEntryKey(entry),
+        kind: 'reasoning',
+        part: entry.part,
+        time: entry.time,
+      } satisfies HistoryWindowEntry;
+    }
+    if (entry.kind === 'question') {
+      return {
+        key: getHistoryEntryKey(entry),
+        kind: 'question',
+        questions: extractQuestionInfos(entry.part),
+        status: resolveQuestionStatus(entry.part),
+        answers: extractQuestionAnswers(entry.part),
+        time: entry.time,
+      } satisfies HistoryWindowEntry;
+    }
+    return {
+      key: getHistoryEntryKey(entry),
+      kind: 'tool',
+      part: entry.part,
+      time: entry.time,
+    } satisfies HistoryWindowEntry;
+  });
+});
 
 const threadTarget = computed<ThreadTargetType>(() => buildThreadTarget(props.root));
 const threadTargetAgentStyle = computed(() => {
@@ -538,7 +601,7 @@ function getThreadUserRenderKey(root: MessageInfo): string {
 }
 
 .ib-msg-user {
-  font-size: 13px;
+  font-size: var(--vis-font-size, 13px);
   padding: 4px 0;
 }
 
@@ -560,7 +623,7 @@ function getThreadUserRenderKey(root: MessageInfo): string {
 .ib-msg-body {
   white-space: pre-wrap;
   word-break: break-word;
-  font-size: 13px;
+  font-size: var(--vis-font-size, 13px);
   --message-line-height: 1.2;
   line-height: var(--message-line-height);
   padding-top: 3px;
@@ -598,18 +661,41 @@ function getThreadUserRenderKey(root: MessageInfo): string {
   background: rgba(30, 64, 175, 0.55);
 }
 
+.ib-actions-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+  align-self: flex-end;
+}
+
 .ib-action-history {
   border-color: color-mix(in srgb, var(--text-muted) 50%, transparent);
   background: color-mix(in srgb, var(--bg-surface-4) 35%, transparent);
   color: var(--text-muted);
   font-size: 10px;
-  margin-top: 4px;
-  align-self: flex-end;
 }
 
 .ib-action-history:hover {
   background: color-mix(in srgb, var(--border-color) 55%, transparent);
   color: var(--text-secondary);
+}
+
+.ib-action-expand {
+  border-color: color-mix(in srgb, var(--text-muted) 50%, transparent);
+  background: color-mix(in srgb, var(--bg-surface-4) 35%, transparent);
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.ib-action-expand:hover {
+  background: color-mix(in srgb, var(--border-color) 55%, transparent);
+  color: var(--text-secondary);
+}
+
+.ib-inline-history {
+  margin-top: 8px;
+  border-top: 1px solid var(--border-faint);
+  padding-top: 8px;
 }
 
 .ib-error-bar {

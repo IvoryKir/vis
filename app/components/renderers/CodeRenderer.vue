@@ -139,7 +139,7 @@ const showLoading = computed(() => {
   justify-content: center;
   height: 100%;
   color: var(--text-faint);
-  font-size: 13px;
+  font-size: var(--vis-font-size, 13px);
   user-select: none;
 }
 </style>

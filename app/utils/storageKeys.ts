@@ -4,6 +4,8 @@ export const StorageKeys = {
   settings: {
     enterToSend: 'settings.enterToSend.v1',
     suppressAutoWindows: 'settings.suppressAutoWindows.v1',
+    fontFamily: 'settings.fontFamily.v1',
+    fontSize: 'settings.fontSize.v1',
   },
   state: {
     sidePanelCollapsed: 'state.sidePanelCollapsed.v1',

@@ -859,16 +859,35 @@ function handleFileChange(event: Event) {
   });
 }
 
-function handlePaste(event: ClipboardEvent) {
+async function handlePaste(event: ClipboardEvent) {
   const items = event.clipboardData?.items ? Array.from(event.clipboardData.items) : [];
-  if (items.length === 0) return;
   const files = items
     .filter((item) => item.kind === 'file')
     .map((item) => item.getAsFile())
     .filter((file): file is File => Boolean(file));
-  if (files.length === 0) return;
-  event.preventDefault();
-  emit('add-attachments', files);
+  if (files.length > 0) {
+    event.preventDefault();
+    emit('add-attachments', files);
+    return;
+  }
+
+  // Tauri WebKitGTK fallback: clipboardData.items doesn't include images
+  // in the webview, so we read them via the native clipboard plugin.
+  if (items.every((item) => item.kind !== 'file') && window.__TAURI_INTERNALS__) {
+    try {
+      const { readImage } = await import('@tauri-apps/plugin-clipboard-manager');
+      const img = await readImage();
+      const rgba = await img.rgba();
+      if (rgba.byteLength > 0) {
+        event.preventDefault();
+        const blob = new Blob([rgba], { type: 'image/png' });
+        const file = new File([blob], 'clipboard-image.png', { type: 'image/png' });
+        emit('add-attachments', [file]);
+      }
+    } catch {
+      // No image in clipboard or plugin not available — let default paste handle it
+    }
+  }
 }
 
 function handleDrop(event: DragEvent) {
@@ -1019,7 +1038,7 @@ const inputMessageStyle = computed(() => {
   min-height: 0;
   box-sizing: border-box;
   color: var(--text-primary);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  font-family: inherit;
 }
 
 .input-message {
@@ -1257,7 +1276,7 @@ const inputMessageStyle = computed(() => {
 .input-textarea {
   resize: none;
   min-height: 1em;
-  font-size: 14px;
+  font-size: var(--vis-font-size, 13px);
   line-height: 1.5;
   display: block;
   width: 100%;

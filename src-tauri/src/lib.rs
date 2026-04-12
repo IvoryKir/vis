@@ -491,6 +491,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_localhost::Builder::new(frontend_port).build())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .manage(Mutex::new(OpencodeState::default()))
         .invoke_handler(tauri::generate_handler![get_api_base])
         .setup(move |app| {

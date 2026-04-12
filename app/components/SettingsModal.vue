@@ -26,7 +26,65 @@
             <span class="toggle-track" />
           </label>
         </div>
+
+        <!-- ── Font Family ── -->
+        <div class="setting-row setting-row-vertical">
+          <div class="setting-info" style="width: 100%;">
+            <div class="setting-label">Font</div>
+            <div class="setting-description" style="margin-bottom: 10px;">
+              Monospace font used across the application.
+            </div>
+            <div class="font-grid">
+              <button
+                v-for="font in FONT_OPTIONS"
+                :key="font.id"
+                class="font-button"
+                :class="{ 'font-button-active': fontFamily === font.id }"
+                @click="fontFamily = font.id"
+              >
+                <div class="font-preview" :style="{ fontFamily: font.family }">
+                  <span class="font-preview-latin">Aa Bb 01</span>
+                  <span class="font-preview-cyrillic">Аа Бб Яя</span>
+                  <span v-if="font.hasLigatures" class="font-preview-ligatures">=> != ===</span>
+                </div>
+                <div class="font-meta">
+                  <span class="font-name">{{ font.name }}</span>
+                  <span v-if="font.hasLigatures" class="font-badge">ligatures</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Font Size ── -->
         <div class="setting-row">
+          <div class="setting-info">
+            <div class="setting-label">Font size</div>
+            <div class="setting-description">
+              Base font size ({{ FONT_SIZE_MIN }}–{{ FONT_SIZE_MAX }}px).
+            </div>
+          </div>
+          <div class="font-size-control">
+            <button
+              class="font-size-btn"
+              :disabled="fontSize <= FONT_SIZE_MIN"
+              @click="fontSize = Math.max(FONT_SIZE_MIN, fontSize - 1)"
+            >
+              <Icon icon="lucide:minus" :width="12" :height="12" />
+            </button>
+            <span class="font-size-value">{{ fontSize }}px</span>
+            <button
+              class="font-size-btn"
+              :disabled="fontSize >= FONT_SIZE_MAX"
+              @click="fontSize = Math.min(FONT_SIZE_MAX, fontSize + 1)"
+            >
+              <Icon icon="lucide:plus" :width="12" :height="12" />
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Theme ── -->
+        <div class="setting-row setting-row-vertical">
           <div class="setting-info" style="width: 100%;">
             <div class="setting-label">Theme</div>
             <div class="setting-description" style="margin-bottom: 12px;">
@@ -70,7 +128,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import { Icon } from '@iconify/vue';
-import { useSettings } from '../composables/useSettings';
+import { useSettings, FONT_OPTIONS, FONT_SIZE_MIN, FONT_SIZE_MAX } from '../composables/useSettings';
 import { useTheme } from '../composables/useTheme';
 
 const props = defineProps<{
@@ -82,7 +140,7 @@ defineEmits<{
 }>();
 
 const dialogRef = ref<HTMLDialogElement | null>(null);
-const { enterToSend } = useSettings();
+const { enterToSend, fontFamily, fontSize } = useSettings();
 const { themes, currentTheme, setTheme } = useTheme();
 
 watch(
@@ -126,7 +184,8 @@ watch(
 }
 
 .modal {
-  width: min(480px, 95vw);
+  width: min(520px, 95vw);
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -136,7 +195,7 @@ watch(
   border-radius: 12px;
   box-shadow: 0 12px 32px color-mix(in srgb, var(--bg-surface-0) 45%, transparent);
   color: var(--text-primary);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  font-family: inherit;
 }
 
 .modal-header {
@@ -144,6 +203,14 @@ watch(
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-shrink: 0;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
 }
 
 .modal-title {
@@ -169,12 +236,6 @@ watch(
   color: var(--text-primary);
 }
 
-.modal-body {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
 .setting-row {
   display: flex;
   align-items: center;
@@ -184,6 +245,10 @@ watch(
   border: 1px solid var(--border-faint);
   border-radius: 8px;
   background: color-mix(in srgb, var(--bg-surface-0) 45%, transparent);
+}
+
+.setting-row-vertical {
+  align-items: stretch;
 }
 
 .setting-info {
@@ -204,6 +269,7 @@ watch(
   color: var(--text-faint);
 }
 
+/* ── Toggle ── */
 .toggle-switch {
   position: relative;
   display: inline-flex;
@@ -251,6 +317,124 @@ watch(
   background: var(--text-primary);
 }
 
+/* ── Font Grid ── */
+.font-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.font-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid var(--border-faint);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  color: var(--text-primary);
+}
+
+.font-button:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-color);
+}
+
+.font-button-active {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--accent-primary);
+}
+
+.font-preview {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.3;
+  flex-shrink: 0;
+}
+
+.font-preview-latin {
+  color: var(--text-primary);
+}
+
+.font-preview-cyrillic {
+  color: var(--text-muted);
+}
+
+.font-preview-ligatures {
+  color: var(--text-faint);
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+
+.font-meta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.font-name {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.font-badge {
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--accent-primary) 15%, transparent);
+  color: var(--accent-primary);
+  white-space: nowrap;
+}
+
+/* ── Font Size Control ── */
+.font-size-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.font-size-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border-faint);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.font-size-btn:hover:not(:disabled) {
+  background: var(--bg-surface-4);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.font-size-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.font-size-value {
+  font-size: 13px;
+  font-weight: 500;
+  min-width: 38px;
+  text-align: center;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Theme Grid ── */
 .theme-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));

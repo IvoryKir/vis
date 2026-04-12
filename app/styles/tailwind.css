@@ -4,8 +4,8 @@
 
 @theme {
   --font-sans:
-    'SF Mono', 'JetBrains Mono', 'Fira Code', ui-monospace, Menlo, Monaco, Consolas,
-    'Liberation Mono', 'Courier New', monospace;
+    var(--vis-font-family, 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas,
+    'Liberation Mono', monospace);
   --color-surface-900: var(--bg-surface-2);
   --color-surface-800: var(--bg-surface-4);
   --color-surface-700: var(--bg-surface-5);
@@ -54,4 +54,12 @@
 ::highlight(fw-search-current) {
   background: rgba(59, 130, 246, 0.58);
   color: var(--text-primary);
+}
+
+/* ── Global font from settings ── */
+html,
+body,
+#app {
+  font-family: var(--vis-font-family, 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace);
+  font-size: var(--vis-font-size, 13px);
 }

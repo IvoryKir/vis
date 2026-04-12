@@ -22,8 +22,8 @@ defineProps<{
 
 <style scoped>
 .tool-placeholder {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 13px;
+  font-family: inherit;
+  font-size: var(--vis-font-size, 13px);
   line-height: 1.5;
   color: var(--text-muted);
   padding: 4px;

@@ -266,5 +266,5 @@ function basename(filepath: string) {
 del.d2h-change { background: rgba(239,68,68,0.35) !important; text-decoration: none !important; border-radius: 2px; }
 ins.d2h-change { background: rgba(34,197,94,0.35) !important; text-decoration: none !important; border-radius: 2px; }
 .d2h-file-list-wrapper { display: none !important; }
-.d2h-code-line-ctn, .d2h-code-side-line { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace !important; font-size: 12px !important; }
+.d2h-code-line-ctn, .d2h-code-side-line { font-family: inherit !important; font-size: var(--vis-font-size, 13px) !important; }
 </style>

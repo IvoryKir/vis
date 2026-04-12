@@ -26,3 +26,7 @@ export function useFloatingWindow(): FloatingWindowAPI {
   }
   return api;
 }
+
+export function useFloatingWindowOptional(): FloatingWindowAPI | null {
+  return inject<FloatingWindowAPI>(FLOATING_WINDOW_KEY, null);
+}

@@ -108,6 +108,8 @@
                     @open-file="openFileViewer"
                     @content-resized="handleOutputPanelContentResized"
                     @initial-render-complete="handleOutputPanelInitialRenderComplete"
+                    @open-history-tool="handleOpenHistoryTool"
+                    @open-history-reasoning="handleOpenHistoryReasoning"
                   />
                 </div>
               </div>
@@ -371,21 +373,20 @@ import {
 
 const credentials = useCredentials();
 const launcherManaged = credentials.launcherManaged;
-const { suppressAutoWindows } = useSettings();
+const { suppressAutoWindows, fontFamilyCSS, fontSize: settingsFontSize } = useSettings();
 const FOLLOW_THRESHOLD_PX = 24;
 const FILE_VIEWER_WINDOW_WIDTH = 840;
 const FILE_VIEWER_WINDOW_HEIGHT = 520;
 const TERM_COLUMNS = 80;
 const TERM_ROWS = 25;
-const TERM_FONT_SIZE_PX = 13;
+const TERM_FONT_SIZE_PX = settingsFontSize.value;
 const TERM_LINE_HEIGHT = 1.1;
 const TERM_TITLEBAR_HEIGHT_PX = 22;
 const TERM_WINDOW_BORDER_PX = 2;
 const TERM_INNER_PADDING_X_PX = 4;
 const TERM_INNER_PADDING_Y_PX = 4;
 const TERM_GUTTER_WIDTH_EM = 3.2;
-const TERM_FONT_FAMILY =
-  "'Iosevka Term', 'Iosevka Fixed', 'JetBrains Mono', 'Cascadia Mono', 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace";
+const TERM_FONT_FAMILY = fontFamilyCSS.value;
 const SHELL_LINGER_MS = 1000;
 const COMMIT_SNAPSHOT_SCRIPT = [
   'stty -opost -echo 2>/dev/null',
@@ -5989,10 +5990,8 @@ onBeforeUnmount(() => {
   --dock-reserved: 0px;
   --tool-top-offset: 0px;
   --tool-area-height: var(--canvas-height, 100%);
-  --term-font-family:
-    'Iosevka Term', 'Iosevka Fixed', 'JetBrains Mono', 'Cascadia Mono', 'SFMono-Regular', Menlo,
-    Consolas, 'Liberation Mono', monospace;
-  --term-font-size: 13px;
+  --term-font-family: var(--vis-font-family, 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace);
+  --term-font-size: var(--vis-font-size, 13px);
   --term-line-height: 1.1;
   --term-width: 670px;
   --term-height: 386px;

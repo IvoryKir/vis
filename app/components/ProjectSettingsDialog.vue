@@ -308,7 +308,7 @@ async function handleSubmit() {
   border-radius: 12px;
   box-shadow: 0 12px 32px color-mix(in srgb, var(--bg-surface-0) 45%, transparent);
   color: var(--text-primary);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  font-family: inherit;
 }
 
 .modal-header {

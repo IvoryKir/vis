@@ -166,7 +166,7 @@ function onBodyKeydown(event: KeyboardEvent) {
     return;
   }
 
-  if (event.key === 'Escape' && props.entry.closable) {
+  if (event.key === 'Escape') {
     event.preventDefault();
     event.stopPropagation();
     onClose();
@@ -441,7 +441,7 @@ function onResizeEnd(e: PointerEvent) {
   >
     <div class="floating-window-titlebar" @pointerdown="onDragStart">
       <span class="title">{{ entry.title || 'Tool' }}</span>
-      <button v-if="entry.closable" class="close-btn" @click.stop="onClose">×</button>
+      <button class="close-btn" :class="{ 'close-btn-auto': !entry.closable }" @click.stop="onClose">×</button>
     </div>
     <div class="floating-window-body-wrapper">
       <div
@@ -530,8 +530,8 @@ function onResizeEnd(e: PointerEvent) {
   background: color-mix(in srgb, var(--window-color, var(--bg-surface-4)) 12%, #1a1d24);
   border: 1px solid var(--window-color, var(--bg-surface-4));
   border-radius: 5px;
-  font-family: var(--term-font-family, monospace);
-  font-size: var(--term-font-size, 14px);
+  font-family: inherit;
+  font-size: inherit;
   line-height: var(--term-line-height, 1.5);
   color: var(--text-primary);
   pointer-events: auto;
@@ -575,6 +575,19 @@ function onResizeEnd(e: PointerEvent) {
 
 .close-btn:hover {
   opacity: 0.8;
+}
+
+.close-btn-auto {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.floating-window-titlebar:hover .close-btn-auto {
+  opacity: 0.5;
+}
+
+.floating-window-titlebar:hover .close-btn-auto:hover {
+  opacity: 1;
 }
 
 .floating-window-body-wrapper {

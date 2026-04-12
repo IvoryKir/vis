@@ -42,6 +42,7 @@
         }
       ]
     },
-    "shell:allow-kill"
+    "shell:allow-kill",
+    "clipboard-manager:allow-read-image"
   ]
 }

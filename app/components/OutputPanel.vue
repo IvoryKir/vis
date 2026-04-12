@@ -40,6 +40,8 @@
                 @open-image="emit('open-image', $event)"
                 @show-thread-history="emit('show-thread-history', $event)"
                 @message-rendered="handleMessageRendered"
+                @open-history-tool="emit('open-history-tool', $event)"
+                @open-history-reasoning="emit('open-history-reasoning', $event)"
               />
             </template>
 
@@ -126,6 +128,8 @@ const emit = defineEmits<{
   (event: 'show-message-diff', payload: { messageKey: string; diffs: MessageDiffEntry[] }): void;
   (event: 'open-image', payload: { url: string; filename: string }): void;
   (event: 'show-thread-history', payload: { entries: HistoryWindowEntry[] }): void;
+  (event: 'open-history-tool', payload: { part: import('../types/sse').ToolPart }): void;
+  (event: 'open-history-reasoning', payload: { part: import('../types/sse').ReasoningPart }): void;
   (event: 'open-file', path: string, lines?: string): void;
   (event: 'show-commit', hash: string): void;
   (event: 'message-rendered'): void;
@@ -335,8 +339,7 @@ defineExpose({ panelEl });
   box-shadow: 0 12px 32px color-mix(in srgb, var(--bg-surface-0) 45%, transparent);
   display: flex;
   flex-direction: column;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
-  font-size: 13px;
+  font-family: inherit;
 }
 
 .output-panel-scroll {

@@ -88,7 +88,7 @@
 
 <script setup lang="ts">
 import MessageViewer from './MessageViewer.vue';
-import { useFloatingWindow } from '../composables/useFloatingWindow';
+import { useFloatingWindowOptional } from '../composables/useFloatingWindow';
 import type { QuestionInfo, ReasoningPart, ToolPart } from '../types/sse';
 
 type QuestionHistoryEntry = {
@@ -118,10 +118,10 @@ const props = withDefaults(
   },
 );
 
-const floatingWindow = useFloatingWindow();
+const floatingWindow = useFloatingWindowOptional();
 
 function handleRendered() {
-  floatingWindow.notifyContentChange();
+  floatingWindow?.notifyContentChange();
 }
 
 function handleToolClick(part: ToolPart) {
@@ -294,7 +294,7 @@ function formatMessageTime(value?: number) {
 
 .history-content-wrapper {
   padding: 10px;
-  font-size: 13px;
+  font-size: var(--vis-font-size, 13px);
   line-height: 1.4;
 }
 
@@ -385,7 +385,7 @@ function formatMessageTime(value?: number) {
 }
 
 .history-question-text {
-  font-size: 13px;
+  font-size: var(--vis-font-size, 13px);
   line-height: 1.4;
   color: var(--text-primary);
 }
@@ -415,7 +415,7 @@ function formatMessageTime(value?: number) {
 
 .option-check {
   flex-shrink: 0;
-  font-size: 13px;
+  font-size: var(--vis-font-size, 13px);
 }
 
 .option-label {
@@ -509,7 +509,7 @@ function formatMessageTime(value?: number) {
 
 .history-tool-content {
   padding: 6px 10px;
-  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-family: inherit;
   font-size: 12px;
   line-height: 1.4;
   color: var(--text-muted);
