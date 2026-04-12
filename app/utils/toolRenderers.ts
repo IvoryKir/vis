@@ -1,13 +1,4 @@
-export function extractXmlTagContent(text: string, tag: string): string | null {
-  const open = `<${tag}>`;
-  const close = `</${tag}>`;
-  const start = text.indexOf(open);
-  const end = text.indexOf(close);
-  if (start === -1 || end === -1 || end <= start) return null;
-  return text.slice(start + open.length, end).trim();
-}
-
-export type ToolRenderersHelpers = {
+type ToolRenderersHelpers = {
   FILE_READ_EVENT_TYPES: Set<string>;
   FILE_WRITE_EVENT_TYPES: Set<string>;
   MESSAGE_EVENT_TYPES: Set<string>;
@@ -41,6 +32,7 @@ export type ToolRenderersHelpers = {
   WebContent: unknown;
 };
 
+
 function toolEmoji(tool: string): string {
   switch (tool) {
     case 'websearch':
@@ -58,36 +50,6 @@ function toolPrefix(tool: string, label: string, detail?: string): string {
   return d ? `${icon} [${label}] ${d}` : `${icon} [${label}]`;
 }
 
-export function extractStepFinish(
-  payload: unknown,
-  eventType: string,
-  helpers: Pick<ToolRenderersHelpers, 'MESSAGE_EVENT_TYPES'>,
-) {
-  if (!payload || typeof payload !== 'object') return null;
-  if (!helpers.MESSAGE_EVENT_TYPES.has(eventType)) return null;
-  const record = payload as Record<string, unknown>;
-  const nestedPayload =
-    record.payload && typeof record.payload === 'object'
-      ? (record.payload as Record<string, unknown>)
-      : undefined;
-  const properties =
-    (nestedPayload?.properties && typeof nestedPayload.properties === 'object'
-      ? (nestedPayload.properties as Record<string, unknown>)
-      : undefined) ??
-    (record.properties && typeof record.properties === 'object'
-      ? (record.properties as Record<string, unknown>)
-      : undefined);
-  const part =
-    properties?.part && typeof properties.part === 'object'
-      ? (properties.part as Record<string, unknown>)
-      : undefined;
-  const partType = typeof part?.type === 'string' ? part.type : undefined;
-  if (partType !== 'step-finish') return null;
-  const reason = typeof part?.reason === 'string' ? (part.reason as string) : undefined;
-  const sessionId = typeof part?.sessionID === 'string' ? (part.sessionID as string) : undefined;
-  const messageId = typeof part?.messageID === 'string' ? (part.messageID as string) : undefined;
-  return { reason, sessionId, messageId };
-}
 
 export function extractPatch(
   payload: unknown,
@@ -317,6 +279,7 @@ export function extractFileRead(
               pattern: typeof input?.pattern === 'string' ? input.pattern : undefined,
               path: typeof input?.path === 'string' ? input.path : undefined,
               include: typeof input?.include === 'string' ? input.include : undefined,
+              variant: 'code',
             },
             callId,
             toolName: tool,
@@ -364,6 +327,7 @@ export function extractFileRead(
               pattern: typeof input?.pattern === 'string' ? input.pattern : undefined,
               path: typeof input?.path === 'string' ? input.path : undefined,
               include: typeof input?.include === 'string' ? input.include : undefined,
+              variant: 'term',
             },
             callId,
             toolName: tool,

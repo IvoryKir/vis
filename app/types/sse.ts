@@ -5,6 +5,15 @@
 // Derived from Zod schemas in opencode/packages/opencode/src/.
 // ---------------------------------------------------------------------------
 
+/**
+ * SSE event types mirroring the OpenCode wire protocol.
+ *
+ * Many packet types below are exported but not yet imported by the app.
+ * This is intentional — they document the full API contract and will be
+ * used as the UI adds support for more event types. Do NOT remove
+ * "unused" exports from this file.
+ */
+
 // ── SSE envelope ──────────────────────────────────────────────────────────
 
 /** Outer structure of every SSE data frame from the server. */

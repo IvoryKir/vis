@@ -1,8 +1,10 @@
+
+
 /**
  * Normalize a relative path by stripping `.`, `..`, and empty segments.
  * Parent traversals (`..`) are silently dropped.
  */
-export function normalizeRelativePathNoParent(value: string) {
+function normalizeRelativePathNoParent(value: string) {
   const segments = value.replace(/\\/g, '/').split('/');
   const cleaned: string[] = [];
   for (const segment of segments) {
@@ -16,7 +18,7 @@ export function normalizeRelativePathNoParent(value: string) {
  * Normalize an absolute path by resolving `.` / `..` segments.
  * The result always starts with `/`.
  */
-export function normalizeAbsolutePathNoParent(value: string) {
+function normalizeAbsolutePathNoParent(value: string) {
   const segments = value.replace(/\\/g, '/').split('/');
   const cleaned: string[] = [];
   for (const segment of segments) {

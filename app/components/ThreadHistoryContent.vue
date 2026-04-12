@@ -98,6 +98,7 @@ import { inject } from 'vue';
 import MessageViewer from './MessageViewer.vue';
 import { useFloatingWindowOptional } from '../composables/useFloatingWindow';
 import type { QuestionInfo, ReasoningPart, ToolPart } from '../types/sse';
+import { formatMessageTime } from '../utils/formatters';
 
 type QuestionHistoryEntry = {
   key: string;
@@ -143,7 +144,6 @@ function handleReasoningClick(part: ReasoningPart) {
 // Inject subagent data from App.vue for task history display
 type SubagentEntry = { id: string; text: string };
 const subagentEntries = inject<Map<string, SubagentEntry[]>>('subagentCompletedEntries', new Map());
-const openSubagentWindow = inject<(sessionId: string) => void>('openSubagentWindow');
 
 function isOptionSelected(
   entry: QuestionHistoryEntry,
@@ -319,17 +319,6 @@ function taskOutput(part: ToolPart): string {
   return '';
 }
 
-function formatMessageTime(value?: number) {
-  if (typeof value !== 'number') return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  const year = String(date.getFullYear());
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day} ${hours}:${minutes}`;
-}
 </script>
 
 <style scoped>

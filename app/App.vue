@@ -308,11 +308,9 @@ import InputPanel from './components/InputPanel.vue';
 import OutputPanel from './components/OutputPanel.vue';
 import ProjectPicker from './components/ProjectPicker.vue';
 import FloatingWindow from './components/FloatingWindow.vue';
-import GlobContent from './components/ToolWindow/Glob.vue';
-import GrepContent from './components/ToolWindow/Grep.vue';
-import ReasoningContent from './components/ToolWindow/Reasoning.vue';
+import SearchResultContent from './components/ToolWindow/SearchResult.vue';
+import MarkdownEntriesContent from './components/ToolWindow/MarkdownEntries.vue';
 import ThreadHistoryContent from './components/ThreadHistoryContent.vue';
-import SubagentContent from './components/ToolWindow/Subagent.vue';
 import WebContent from './components/ToolWindow/Web.vue';
 import SidePanel from './components/SidePanel.vue';
 import Welcome from './components/Welcome.vue';
@@ -937,7 +935,7 @@ const currentProjectName = computed(() => {
 const reasoning = useReasoningWindows({
   selectedSessionId,
   fw,
-  reasoningComponent: ReasoningContent,
+  reasoningComponent: MarkdownEntriesContent,
   theme: () => 'github-dark',
   reasoningCloseDelayMs: REASONING_CLOSE_DELAY_MS,
   resolveModelName: (providerID, modelID) => {
@@ -951,7 +949,7 @@ const { updateReasoningExpiry } = reasoning;
 const subagentWindows = useSubagentWindows({
   selectedSessionId,
   fw,
-  subagentComponent: SubagentContent,
+  subagentComponent: MarkdownEntriesContent,
   theme: () => 'github-dark',
   closeDelayMs: SUBAGENT_CLOSE_DELAY_MS,
   resolveModelName: (providerID, modelID) => {
@@ -1363,16 +1361,6 @@ function sessionLabel(session: SessionInfo) {
   return session.title || session.slug || session.id;
 }
 
-/** Look up session title from server state by session ID. */
-function resolveSessionTitle(sessionId: string): string {
-  for (const project of Object.values(serverState.projects)) {
-    for (const sandbox of Object.values(project.sandboxes)) {
-      const session = sandbox.sessions[sessionId];
-      if (session) return session.title || session.slug || session.id;
-    }
-  }
-  return '';
-}
 
 function directoryBasename(path: string): string {
   if (!path) return '';
@@ -1394,7 +1382,7 @@ function resolveTabLabel(sessionId: string, projectId?: string): string {
       const session = sandbox.sessions[sessionId];
       if (session) {
         // Repo name = branch name or last segment of directory
-        repoName = sandbox.branch || directoryBasename(sandbox.directory);
+        repoName = sandbox.name || directoryBasename(sandbox.directory);
         sessionTitle = session.title || session.slug || '';
         break;
       }
@@ -4257,8 +4245,8 @@ const toolRendererHelpers = {
   formatWebfetchToolTitle,
   formatQueryToolTitle,
   formatTaskToolOutput,
-  GrepContent,
-  GlobContent,
+  GrepContent: SearchResultContent,
+  GlobContent: SearchResultContent,
   WebContent,
 };
 
@@ -4278,7 +4266,7 @@ const msg = useMessages();
 reasoning.bindScope(sessionScope);
 subagentWindows.bindScope(sessionScope);
 
-watch(selectedSessionId, reloadSelectedSessionState, { immediate: true });
+watch(selectedSessionId, () => reloadSelectedSessionState(), { immediate: true });
 
 watch([selectedProjectId, selectedSessionId], syncActiveSelectionToWorker, { immediate: true });
 
@@ -4985,7 +4973,7 @@ function handleOpenHistoryReasoning(payload: { part: ReasoningPart }) {
   const key = `history-reasoning:${payload.part.id}`;
   historyToolWindowKeys.add(key);
   fw.open(key, {
-    component: ReasoningContent,
+    component: MarkdownEntriesContent,
     props: {
       entries: [{ id: payload.part.id, text: payload.part.text }],
       theme: 'github-dark',

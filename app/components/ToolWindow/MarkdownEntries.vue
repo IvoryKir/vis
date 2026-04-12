@@ -1,10 +1,10 @@
 <template>
-  <div class="reasoning-content">
+  <div class="md-entries-content">
     <div
       v-for="(entry, index) in entries"
       :key="entry.id"
-      class="reasoning-entry"
-      :class="{ 'reasoning-entry-separator': index > 0 }"
+      class="md-entry"
+      :class="{ 'md-entry-separator': index > 0 }"
     >
       <MessageViewer :code="entry.text" lang="markdown" :theme="theme" @rendered="handleRendered" />
     </div>
@@ -15,14 +15,14 @@
 import MessageViewer from '../MessageViewer.vue';
 import { useFloatingWindow } from '../../composables/useFloatingWindow';
 
-export type ReasoningEntry = {
+export type MarkdownEntry = {
   id: string;
   text: string;
 };
 
 withDefaults(
   defineProps<{
-    entries: ReasoningEntry[];
+    entries: MarkdownEntry[];
     theme?: string;
   }>(),
   {
@@ -38,11 +38,11 @@ function handleRendered() {
 </script>
 
 <style scoped>
-.reasoning-content {
+.md-entries-content {
   min-height: 100%;
 }
 
-.reasoning-entry-separator {
+.md-entry-separator {
   margin-top: 0.4em;
   padding-top: 0.4em;
   border-top: 1px solid color-mix(in srgb, var(--text-muted) 15%, transparent);

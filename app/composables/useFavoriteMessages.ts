@@ -1,7 +1,7 @@
 import { ref, watch } from 'vue';
 import { StorageKeys, storageGetJSON, storageKey, storageSetJSON } from '../utils/storageKeys';
 
-export type FavoriteMessageEntry = {
+type FavoriteMessageEntry = {
   text: string;
   agent?: string;
   agentColor?: string;

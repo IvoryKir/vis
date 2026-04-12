@@ -37,7 +37,7 @@ export type SessionScope = {
   dispose(): void;
 };
 
-export type MainSessionScope = SessionScope;
+type MainSessionScope = SessionScope;
 
 const KNOWN_EVENT_TYPES = new Set<EventKey>([
   'message.updated',

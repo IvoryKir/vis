@@ -20,7 +20,7 @@
         type="button"
         class="viewer-tab"
         :class="{ active: mode.id === primaryMode }"
-        @click="primaryMode = mode.id"
+        @click="primaryMode = mode.id as PrimaryMode"
       >
         {{ mode.label }}
       </button>
@@ -62,6 +62,7 @@ import { computed, ref, shallowRef, watch } from 'vue';
 import { guessLanguageFromPath } from '../ToolWindow/utils';
 import DiffRenderer from '../renderers/DiffRenderer.vue';
 import ContentViewer from './ContentViewer.vue';
+import { BITMAP_EXTENSIONS } from '../../utils/fileTypes';
 // diff2html and diff are loaded dynamically to avoid babel parser
 // issues with namespace imports in vue/compiler-sfc.
 // Using shallowRef so Vue tracks when they become available.
@@ -118,7 +119,6 @@ const activeEntry = computed(() => {
   return tabs[activeFileIndex.value] ?? tabs[0];
 });
 
-const BITMAP_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp']);
 
 const isBitmapFile = computed(() => {
   const filepath = activeEntry.value.file || props.path || '';
@@ -127,7 +127,7 @@ const isBitmapFile = computed(() => {
   return BITMAP_EXTENSIONS.has(ext);
 });
 
-const primaryModes = computed(() => {
+const primaryModes = computed<{ id: PrimaryMode; label: string }[]>(() => {
   if (!hasBeforeAfter.value) return [{ id: 'diff', label: 'Diff' }];
   if (isBitmapFile.value) {
     return [
@@ -188,7 +188,7 @@ const sideBySideHtml = computed(() => {
     drawFileList: false,
     matching: 'lines',
     diffStyle: 'word',
-    colorScheme: 'dark',
+    colorScheme: 'dark' as unknown as import('diff2html/lib/types').ColorSchemeType,
     renderNothingWhenEmpty: false,
   });
 });

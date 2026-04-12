@@ -9,7 +9,7 @@ import type { SessionScope } from './useGlobalEvents';
 import type { useFloatingWindows } from './useFloatingWindows';
 import { useDeltaAccumulator } from './useDeltaAccumulator';
 
-export type ReasoningFinish = {
+type ReasoningFinish = {
   id: string;
   time: number;
 };
@@ -280,5 +280,3 @@ export function useReasoningWindows(options: UseReasoningWindowsOptions) {
     bindScope: subscribe,
   };
 }
-
-export type UseReasoningWindowsReturn = ReturnType<typeof useReasoningWindows>;

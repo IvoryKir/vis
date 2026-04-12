@@ -88,7 +88,7 @@ export type BranchEntry = {
   hasLocalCounterpart: boolean;
 };
 
-export type GitStatus = {
+type GitStatus = {
   branch: GitBranchInfo;
   files: GitFileStatus[];
   diffStats: GitDiffStats;

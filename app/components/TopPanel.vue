@@ -318,6 +318,7 @@ import Dropdown from './Dropdown.vue';
 import DropdownItem from './Dropdown/Item.vue';
 import DropdownSearch from './Dropdown/Search.vue';
 import SessionTabBar from './SessionTabBar.vue';
+import { matchesQuery } from '../utils/search';
 
 declare const __GIT_REVISION__: string;
 const gitRevision = typeof __GIT_REVISION__ !== 'undefined' ? __GIT_REVISION__ : 'dev';
@@ -515,11 +516,6 @@ const displayedTree = computed(() => {
   }));
 });
 
-function matchesQuery(query: string, ...fields: (string | undefined)[]) {
-  const terms = query.split(/\s+/).filter(Boolean);
-  if (terms.length === 0) return false;
-  return terms.every((term) => fields.some((field) => field?.toLowerCase().includes(term)));
-}
 
 function sessionShareHref(projectId: string | undefined, sessionId: string) {
   const params = new URLSearchParams();

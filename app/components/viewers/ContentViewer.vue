@@ -45,6 +45,7 @@ import CodeRenderer from '../renderers/CodeRenderer.vue';
 import HexRenderer from '../renderers/HexRenderer.vue';
 import ImageRenderer from '../renderers/ImageRenderer.vue';
 import MarkdownRenderer from '../renderers/MarkdownRenderer.vue';
+import { BITMAP_EXTENSIONS, IMAGE_EXTENSIONS } from '../../utils/fileTypes';
 
 type ModeId = 'rendered' | 'source' | 'image' | 'hex';
 
@@ -64,8 +65,6 @@ const emit = defineEmits<{
   (event: 'rendered'): void;
 }>();
 
-const BITMAP_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp']);
-const IMAGE_EXTENSIONS = new Set(['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg']);
 
 function mimeTypeFromExt(ext?: string) {
   switch ((ext ?? '').toLowerCase()) {

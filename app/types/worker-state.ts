@@ -84,4 +84,3 @@ export type WorkerNotificationEntry = {
   requestIds: string[];
 };
 
-export type NotificationState = Record<string, WorkerNotificationEntry>;

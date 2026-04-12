@@ -1,6 +1,6 @@
 import { computed, ref, shallowReactive, watch } from 'vue';
 
-export type SessionTabStatus = 'idle' | 'busy' | 'error';
+type SessionTabStatus = 'idle' | 'busy' | 'error';
 
 export interface OpenSession {
   /** Unique session ID from opencode. */

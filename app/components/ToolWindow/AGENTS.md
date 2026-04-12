@@ -1,25 +1,21 @@
 # ToolWindow/ — Tool Output Viewers
 
-13 SFCs, one per OpenCode tool type. Displayed inside FloatingWindow containers.
+8 SFCs for OpenCode tool types. Displayed inside FloatingWindow containers.
+Most simple tools (bash, read, edit, task) render directly via CodeContent — no dedicated component.
 
 ## TOOL → COMPONENT MAP
 
 | Tool name | Component | Interactive? | Key prop |
 |-----------|-----------|-------------|----------|
-| bash | Bash.vue | no | `html`, `command`, `status` |
-| read | Read.vue | no | `html` |
-| edit, multiedit | Edit.vue | no | `html` (diff) |
-| write | Edit.vue | no | `html` (diff) |
-| grep, codesearch | Grep.vue | no | `html`, `pattern`, `status` |
-| glob, list | Glob.vue | no | `html`, `pattern`, `status` |
+| grep, codesearch | SearchResult.vue | no | `html`, `pattern`, `status`, `variant='code'` |
+| glob, list | SearchResult.vue | no | `html`, `pattern`, `status`, `variant='term'` |
 | webfetch, websearch | Web.vue | no | `html`, `url`/`query`, `status` |
-| task | Task.vue | no | `html` (terminal style) |
 | shell | Shell.vue | no | `shellId` (xterm.js) |
 | permission | Permission.vue | **yes** | `request` → emits `reply` |
 | question | Question.vue | **yes** | `request` → emits `reply`, `reject` |
-| reasoning | Reasoning.vue | no | `entries[]` (markdown) |
-| subagent | Subagent.vue | no | `entries[]` (markdown) |
-| (unknown) | Default.vue | no | `html` (fallback) |
+| reasoning | MarkdownEntries.vue | no | `entries[]` (markdown) |
+| subagent | MarkdownEntries.vue | no | `entries[]` (markdown) |
+| bash, read, edit, task, etc. | *(CodeContent via FloatingWindow)* | no | `html` + `variant` |
 
 ## PATTERNS
 

@@ -27,7 +27,7 @@ export type QuestionRequest = {
   };
 };
 
-export type QuestionAnswer = string[];
+type QuestionAnswer = string[];
 
 const QUESTION_WINDOW_WIDTH = 760;
 const QUESTION_WINDOW_HEIGHT = 560;

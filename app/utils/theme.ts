@@ -1,10 +1,10 @@
 // app/utils/theme.ts
 
-export type ThemeColors = {
+type ThemeColors = {
   [key: string]: string;
 };
 
-export type ThemeJson = {
+type ThemeJson = {
   $schema?: string;
   defs: { [key: string]: string };
   theme: {

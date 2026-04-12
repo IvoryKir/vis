@@ -543,7 +543,7 @@ function dispose() {
   };
 }
 
-export type UseMessages = ReturnType<typeof createMessages>;
+type UseMessages = ReturnType<typeof createMessages>;
 
 // ---------------------------------------------------------------------------
 // Module-level state
@@ -653,15 +653,3 @@ export function useMessages(sessionId?: string): UseMessages {
   return activeProxy;
 }
 
-/**
- * Dispose and remove a session's message store from the cache.
- * Call this when closing a tab to free memory.
- */
-export function disposeMessages(sessionId: string) {
-  const store = messageStores.get(sessionId);
-  if (store) {
-    store.dispose();
-    store.reset();
-    messageStores.delete(sessionId);
-  }
-}

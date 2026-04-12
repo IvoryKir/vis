@@ -37,7 +37,7 @@ export interface FloatingWindowEntry {
   sessionId?: string;
   }
 
-export type Extent = { width: number; height: number };
+type Extent = { width: number; height: number };
 
 const TOOL_RUNNING_TTL_MS = 1000 * 60 * 10;
 const TOOL_COMPLETED_TTL_MS = 2000;
@@ -209,6 +209,7 @@ export function useFloatingWindows() {
       (isGlobalWindow ? undefined : (_filterSessionId.value || undefined));
 
     // Merge with defaults and existing
+    const closable = opts.closable ?? existing?.closable ?? false;
     const merged: FloatingWindowEntry = {
       ...DEFAULT_OPTS,
       ...existing,
@@ -218,7 +219,7 @@ export function useFloatingWindows() {
       time: Date.now(),
       zIndex: existing
         ? existing.zIndex
-        : nextZIndex(isManualTier(key, opts.closable ?? existing?.closable)),
+        : nextZIndex(isManualTier(key, closable)),
     } as FloatingWindowEntry;
 
     // When updating an existing entry, merge props instead of replacing

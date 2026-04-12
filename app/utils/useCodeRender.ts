@@ -14,7 +14,7 @@ export type CodeRenderParams = {
   lineLimit?: number;
 };
 
-export type CodeRenderResult = {
+type CodeRenderResult = {
   html: Ref<string>;
   error: Ref<string>;
 };

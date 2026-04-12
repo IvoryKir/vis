@@ -9,7 +9,7 @@ type NotificationEntry = {
   requestIds: Set<string>;
 };
 
-export type NotificationSnapshotEntry = {
+type NotificationSnapshotEntry = {
   projectId: string;
   sessionId: string;
   requestIds: string[];

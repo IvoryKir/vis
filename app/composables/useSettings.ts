@@ -9,11 +9,11 @@ export const FONT_OPTIONS = [
   { id: 'source-code-pro', name: 'Source Code Pro', family: "'Source Code Pro'", hasLigatures: false },
 ] as const;
 
-export type FontId = (typeof FONT_OPTIONS)[number]['id'];
+type FontId = (typeof FONT_OPTIONS)[number]['id'];
 
 export const FONT_SIZE_MIN = 10;
 export const FONT_SIZE_MAX = 20;
-export const FONT_SIZE_DEFAULT = 13;
+const FONT_SIZE_DEFAULT = 13;
 
 const DEFAULT_FONT: FontId = 'jetbrains-mono';
 

@@ -219,7 +219,7 @@ export function useSubagentWindows(options: UseSubagentWindowsOptions) {
         component: subagentComponent,
         props: { entries: [...entries], theme: theme() },
         title: '🤖 Subagent result',
-        scroll: 'top',
+        scroll: 'manual',
         resizable: true,
         closable: true,
         color: SUBAGENT_WINDOW_COLOR,

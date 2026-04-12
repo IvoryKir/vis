@@ -370,6 +370,7 @@ import DropdownSearch from './Dropdown/Search.vue';
 import { useMessages } from '../composables/useMessages';
 import { useFavoriteMessages } from '../composables/useFavoriteMessages';
 import { useSettings } from '../composables/useSettings';
+import { matchesQuery } from '../utils/search';
 type ModelOption = {
   id: string;
   modelID: string;
@@ -875,7 +876,7 @@ async function handlePaste(event: ClipboardEvent) {
   // in the webview, so we read them via the native clipboard plugin.
   // readImage() returns an Image resource; .rgba() gives raw RGBA pixels,
   // NOT a PNG file. We must encode via Canvas to get a proper PNG blob.
-  if (items.every((item) => item.kind !== 'file') && window.__TAURI_INTERNALS__) {
+  if (items.every((item) => item.kind !== 'file') && '__TAURI_INTERNALS__' in window) {
     try {
       const { readImage } = await import('@tauri-apps/plugin-clipboard-manager');
       const img = await readImage();
@@ -995,11 +996,6 @@ const groupedModelOptions = computed(() => {
   return Array.from(grouped.values());
 });
 
-function matchesQuery(query: string, ...fields: (string | undefined)[]) {
-  const terms = query.split(/\s+/).filter(Boolean);
-  if (terms.length === 0) return false;
-  return terms.every((term) => fields.some((field) => field?.toLowerCase().includes(term)));
-}
 
 const filteredGroupedModelOptions = computed(() => {
   const query = modelSearchQuery.value.trim().toLowerCase();

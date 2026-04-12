@@ -1,16 +1,12 @@
 import type { SsePacket } from '../types/sse';
 
-export type SseConnectionOptions = {
+type SseConnectionOptions = {
   baseUrl: string;
   authorization?: string;
 };
 
-export type SseConnectionConnectOptions = {
-  failFast?: boolean;
-  timeoutMs?: number;
-};
 
-export type SseConnectionCallbacks = {
+type SseConnectionCallbacks = {
   onPacket: (packet: SsePacket) => void;
   onOpen: (isReconnect: boolean) => void;
   onError: (message: string, statusCode?: number) => void;
