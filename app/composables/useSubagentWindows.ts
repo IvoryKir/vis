@@ -42,6 +42,8 @@ export function useSubagentWindows(options: UseSubagentWindowsOptions) {
   const acc = useDeltaAccumulator();
 
   const entriesBySession = reactive(new Map<string, SubagentEntry[]>());
+  // Persisted entries for closed subagent windows — accessible from history view
+  const completedEntries = reactive(new Map<string, SubagentEntry[]>());
 
   const closeTimers = new Map<string, number>();
   const activeMessageIdBySession = new Map<string, string>();
@@ -61,6 +63,11 @@ export function useSubagentWindows(options: UseSubagentWindowsOptions) {
     const windowKey = getWindowKey(sessionId);
     if (fw.has(windowKey)) {
       void fw.close(windowKey);
+    }
+    // Keep entries in completedEntries for history view
+    const entries = entriesBySession.get(sessionId);
+    if (entries && entries.length > 0) {
+      completedEntries.set(sessionId, [...entries]);
     }
     entriesBySession.delete(sessionId);
     activeMessageIdBySession.delete(sessionId);
@@ -202,5 +209,24 @@ export function useSubagentWindows(options: UseSubagentWindowsOptions) {
   return {
     reset,
     bindScope: subscribe,
+    completedEntries,
+    entriesBySession,
+    openSubagentWindow(sessionId: string) {
+      const entries = completedEntries.get(sessionId) || entriesBySession.get(sessionId);
+      if (!entries || entries.length === 0) return;
+      const windowKey = getWindowKey(sessionId);
+      void fw.open(windowKey, {
+        component: subagentComponent,
+        props: { entries: [...entries], theme: theme() },
+        title: '🤖 Subagent result',
+        scroll: 'top',
+        resizable: true,
+        closable: true,
+        color: SUBAGENT_WINDOW_COLOR,
+        variant: 'message',
+        width: 600,
+        height: 400,
+      });
+    },
   };
 }

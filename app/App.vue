@@ -296,6 +296,7 @@ import {
   nextTick,
   onBeforeUnmount,
   onMounted,
+  provide,
   reactive,
   ref,
   watch,
@@ -959,6 +960,10 @@ const subagentWindows = useSubagentWindows({
   },
   suppressAutoWindows,
 });
+
+// Provide subagent completed entries for history view access
+provide('subagentCompletedEntries', subagentWindows.completedEntries);
+provide('openSubagentWindow', subagentWindows.openSubagentWindow);
 
 const homePath = ref('');
 const serverWorktreePath = ref('');

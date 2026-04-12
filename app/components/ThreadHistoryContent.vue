@@ -66,6 +66,7 @@
         <div
           v-else
           class="history-item history-item-tool"
+          :class="{ 'history-item-task': entry.part.tool === 'task' }"
           :style="{ '--tool-color': toolHeaderColor(entry.part.tool) }"
           @click="handleToolClick(entry.part)"
         >
@@ -80,6 +81,12 @@
             <span class="history-time">{{ formatMessageTime(entry.time) }}</span>
           </div>
           <div class="history-tool-content">{{ toolSummary(entry.part) }}</div>
+          <template v-if="entry.part.tool === 'task'">
+            <div v-if="taskAgentInfo(entry.part)" class="history-task-agent">
+              ↳ {{ taskAgentInfo(entry.part) }}
+            </div>
+            <div v-if="taskOutput(entry.part)" class="history-task-output">{{ taskOutput(entry.part) }}</div>
+          </template>
         </div>
       </template>
     </div>
@@ -87,6 +94,7 @@
 </template>
 
 <script setup lang="ts">
+import { inject } from 'vue';
 import MessageViewer from './MessageViewer.vue';
 import { useFloatingWindowOptional } from '../composables/useFloatingWindow';
 import type { QuestionInfo, ReasoningPart, ToolPart } from '../types/sse';
@@ -131,6 +139,11 @@ function handleToolClick(part: ToolPart) {
 function handleReasoningClick(part: ReasoningPart) {
   props.onReasoningClick?.(part);
 }
+
+// Inject subagent data from App.vue for task history display
+type SubagentEntry = { id: string; text: string };
+const subagentEntries = inject<Map<string, SubagentEntry[]>>('subagentCompletedEntries', new Map());
+const openSubagentWindow = inject<(sessionId: string) => void>('openSubagentWindow');
 
 function isOptionSelected(
   entry: QuestionHistoryEntry,
@@ -258,6 +271,52 @@ function toolSummary(part: ToolPart): string {
     case 'webfetch': case 'websearch': return 'var(--accent-primary)';
     default: return 'var(--text-faint)';
   }
+}
+
+function taskAgentInfo(part: ToolPart): string {
+  const input = part.state.input;
+  const agent = typeof input?.subagent_type === 'string' ? input.subagent_type : '';
+  const category = typeof input?.category === 'string' ? input.category : '';
+  const parts: string[] = [];
+  if (agent) parts.push(`agent: ${agent}`);
+  if (category) parts.push(`category: ${category}`);
+  return parts.join(' | ');
+}
+
+function extractSessionIdFromOutput(output: string): string | null {
+  const match = output.match(/session_id:\s*(ses_[a-zA-Z0-9]+)/);
+  return match ? match[1] : null;
+}
+
+function taskOutput(part: ToolPart): string {
+  const state = part.state;
+  if (state.status === 'completed' && state.output) {
+    // Try to find subagent result from SSE-streamed entries (persisted after window close)
+    const sessionId = extractSessionIdFromOutput(state.output);
+    if (sessionId && subagentEntries) {
+      const entries = subagentEntries.get(sessionId);
+      if (entries && entries.length > 0) {
+        const text = entries.map((e) => e.text).join('\n\n').trim();
+        return text;
+      }
+    }
+    // Fallback: parse output text, strip metadata boilerplate
+    let text = state.output.trim();
+    const separatorIdx = text.indexOf('\n---\n');
+    if (separatorIdx !== -1) {
+      text = text.slice(separatorIdx + 5).trim();
+    }
+    text = text.replace(/<task_metadata>[\s\S]*?<\/task_metadata>/g, '').trim();
+    text = text.replace(/\n*to continue:.*$/s, '').trim();
+    if (!text || text.startsWith('Background task launched') || text.length < 10) {
+      return '';
+    }
+    return text;
+  }
+  if (state.status === 'error' && 'error' in state) {
+    return `Error: ${state.error}`;
+  }
+  return '';
 }
 
 function formatMessageTime(value?: number) {
@@ -542,5 +601,27 @@ function formatMessageTime(value?: number) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.history-item-task {
+  cursor: default;
+}
+
+.history-task-agent {
+  padding: 2px 10px 0;
+  font-size: 11px;
+  color: var(--color-info);
+  opacity: 0.8;
+}
+
+.history-task-output {
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-top: 1px solid var(--border-faint);
+  margin-top: 4px;
 }
 </style>
