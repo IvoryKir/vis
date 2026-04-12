@@ -242,13 +242,14 @@ function toolSummary(part: ToolPart): string {
     }
     default:
       return part.tool;
+  }
 }
 
-function toolStatusLabel(part: ToolPart): string {
+  function toolStatusLabel(part: ToolPart): string {
   return part.state.status;
 }
 
-function toolHeaderColor(tool: string): string {
+  function toolHeaderColor(tool: string): string {
   switch (tool) {
     case 'bash': case 'shell': return 'var(--color-purple)';
     case 'edit': case 'multiedit': case 'apply_patch': case 'write': return 'var(--color-orange)';
@@ -257,7 +258,6 @@ function toolHeaderColor(tool: string): string {
     case 'webfetch': case 'websearch': return 'var(--accent-primary)';
     default: return 'var(--text-faint)';
   }
-}
 }
 
 function formatMessageTime(value?: number) {

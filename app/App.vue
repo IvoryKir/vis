@@ -2999,7 +2999,7 @@ function ensureShellWindow(pty: PtyInfo) {
     fontFamily: TERM_FONT_FAMILY,
     fontSize: TERM_FONT_SIZE_PX,
     lineHeight: TERM_LINE_HEIGHT,
-    cursorBlink: true,
+    cursorBlink: !('__TAURI_INTERNALS__' in window),
     theme: {
       background: 'var(--bg-base)',
       foreground: 'var(--text-primary)',

@@ -1212,6 +1212,7 @@ function onRowDoubleClick(row: { node: TreeNode }) {
   overflow: auto;
   padding: 8px;
   user-select: none;
+  contain: layout style;
 }
 
 .tree-row {

@@ -43,6 +43,7 @@
       ]
     },
     "shell:allow-kill",
-    "clipboard-manager:allow-read-image"
+    "clipboard-manager:allow-read-image",
+    "core:image:default"
   ]
 }

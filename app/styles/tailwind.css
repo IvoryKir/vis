@@ -63,3 +63,13 @@ body,
   font-family: var(--vis-font-family, 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace);
   font-size: var(--vis-font-size, 13px);
 }
+
+/* ── Reduced paint-cost for Tauri/WebKitGTK ── */
+/* Tauri desktop apps use WebKitGTK where heavy box-shadows on scroll/fixed
+   surfaces cause expensive repaints. This media query has no effect in
+   browsers but JS sets a class on <html> in Tauri to activate it. */
+html.tauri-desktop .output-panel,
+html.tauri-desktop .floating-window,
+html.tauri-desktop .modal {
+  box-shadow: none !important;
+}

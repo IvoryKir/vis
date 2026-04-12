@@ -71,6 +71,10 @@ pnpm install
 pnpm dev
 ```
 
+## TODO
+
+- [ ] **Thread virtualization** — long chat histories (500+ messages) render all ThreadBlock components in the DOM simultaneously, causing significant paint/layout cost in WebKitGTK. Implement virtual scrolling (render only visible blocks + buffer) to cap DOM node count regardless of history length.
+- [ ] **Subagent history aggregation** — subagent (task) tool calls show as single entries in thread history. Their internal tool calls live in a separate child session (linked via `session.parentID`). Implement cross-session data access to display nested subagent actions as a collapsible tree under the parent task entry.
 ## License
 
 MIT

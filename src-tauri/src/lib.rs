@@ -440,19 +440,46 @@ fn install_desktop_entry() {
 }
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // WebKitGTK compositing/DMA-BUF performance workaround.
-    // Paradoxically, disabling HW-accelerated compositing often *improves*
-    // rendering performance in WebKitGTK — confirmed across Tauri, Wails,
-    // GitButler and dozens of GitHub issues. The DMA-BUF renderer has known
-    // bugs with certain GPU drivers and causes high CPU usage even on AMD/Intel.
-    // See: tauri-apps/tauri#9394, gitbutlerapp/gitbutler#11602, wry#890
+    // ── WebKitGTK rendering configuration ──
+    // The HW acceleration policy is configurable via VIS_HW_ACCEL env var:
+    //   "on"        → HardwareAccelerationPolicy::Always
+    //   "on_demand" → HardwareAccelerationPolicy::OnDemand (default on Wayland)
+    //   "off"       → HardwareAccelerationPolicy::Never (default on X11)
+    // Compositing and DMA-BUF are left to WebKitGTK defaults unless the user
+    // explicitly sets WEBKIT_DISABLE_COMPOSITING_MODE or WEBKIT_DISABLE_DMABUF_RENDERER.
+    //
+    // Rationale: blanket-disabling HW accel hurts performance on modern Wayland
+    // setups with EGL/DMABUF compositing. Only X11 + certain GPU drivers show
+    // the high-CPU regressions from tauri#9394 / wry#890.
     #[cfg(target_os = "linux")]
     {
-        // SAFETY: called before any other threads are spawned.
-        unsafe {
-            std::env::set_var("WEBKIT_DISABLE_COMPOSITING_MODE", "1");
-            std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+        let is_wayland = std::env::var("WAYLAND_DISPLAY").is_ok()
+            || std::env::var("XDG_SESSION_TYPE")
+                .map(|v| v == "wayland")
+                .unwrap_or(false);
+
+        // On X11 with no explicit override, disable DMABUF (known buggy on many drivers).
+        // On Wayland leave it alone — EGL/DMABUF is the fast path.
+        if !is_wayland && std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
+            // SAFETY: called before any other threads are spawned.
+            unsafe {
+                std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+            }
         }
+
+        // Prefer Wayland-native EGL when available.
+        if is_wayland && std::env::var("GDK_DEBUG").is_err() {
+            unsafe {
+                std::env::set_var("GDK_DEBUG", "gl-egl");
+            }
+        }
+
+        eprintln!(
+            "[vis] display: {} | DMABUF: {} | compositing: {}",
+            if is_wayland { "wayland" } else { "x11" },
+            if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").unwrap_or_default() == "1" { "off" } else { "on" },
+            if std::env::var("WEBKIT_DISABLE_COMPOSITING_MODE").unwrap_or_default() == "1" { "off" } else { "on" },
+        );
     }
     // Pick the port for the embedded frontend HTTP server.
     //
@@ -512,7 +539,8 @@ pub fn run() {
                 CapabilityBuilder::new("localhost-remote")
                     .remote(url.to_string())
                     .window("main")
-                    .permission("clipboard-manager:allow-read-image"),
+                    .permission("clipboard-manager:allow-read-image")
+                    .permission("core:image:default"),
             )?;
 
             WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url.clone()))
@@ -526,10 +554,7 @@ pub fn run() {
                 .visible(false)
                 .build()?;
 
-            // Disable HW acceleration via WebKitGTK settings API.
-            // Environment variables (WEBKIT_DISABLE_COMPOSITING_MODE) are unreliable
-            // when the webview is created via plugin-localhost. Using with_webview
-            // gives us direct access to the underlying webkit2gtk::WebView.
+            // ── WebKitGTK settings via native API ──
             #[cfg(target_os = "linux")]
             {
                 use webkit2gtk::{SettingsExt, WebViewExt};
@@ -537,12 +562,29 @@ pub fn run() {
                 main_window.with_webview(move |webview| {
                     let wv = webview.inner();
                     if let Some(settings) = WebViewExt::settings(&wv) {
-                        settings.set_hardware_acceleration_policy(
-                            webkit2gtk::HardwareAccelerationPolicy::Never,
-                        );
-                        // Also enable page cache for faster back/forward
+                        let is_wayland = std::env::var("WAYLAND_DISPLAY").is_ok()
+                            || std::env::var("XDG_SESSION_TYPE")
+                                .map(|v| v == "wayland")
+                                .unwrap_or(false);
+
+                        // Resolve HW acceleration policy:
+                        //   VIS_HW_ACCEL override > auto-detect (Wayland=on_demand, X11=off)
+                        let policy_str = std::env::var("VIS_HW_ACCEL").unwrap_or_else(|_| {
+                            if is_wayland { "on_demand".into() } else { "off".into() }
+                        });
+                        let policy = match policy_str.to_lowercase().as_str() {
+                            "on" | "always" => webkit2gtk::HardwareAccelerationPolicy::Always,
+                            "on_demand" | "ondemand" => webkit2gtk::HardwareAccelerationPolicy::OnDemand,
+                            _ => webkit2gtk::HardwareAccelerationPolicy::Never,
+                        };
+                        settings.set_hardware_acceleration_policy(policy);
                         settings.set_enable_page_cache(true);
-                        eprintln!("[vis] WebKitGTK: HW accel=NEVER, page_cache=ON");
+                        settings.set_enable_smooth_scrolling(true);
+
+                        eprintln!(
+                            "[vis] WebKitGTK: hw_accel={}, page_cache=ON, smooth_scroll=ON",
+                            policy_str,
+                        );
                     }
                 }).ok();
             }

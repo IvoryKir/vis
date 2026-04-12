@@ -351,6 +351,7 @@ defineExpose({ panelEl });
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  contain: layout style;
   mask-image: linear-gradient(
     to bottom,
     transparent,

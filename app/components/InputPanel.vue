@@ -873,19 +873,29 @@ async function handlePaste(event: ClipboardEvent) {
 
   // Tauri WebKitGTK fallback: clipboardData.items doesn't include images
   // in the webview, so we read them via the native clipboard plugin.
+  // readImage() returns an Image resource; .rgba() gives raw RGBA pixels,
+  // NOT a PNG file. We must encode via Canvas to get a proper PNG blob.
   if (items.every((item) => item.kind !== 'file') && window.__TAURI_INTERNALS__) {
     try {
       const { readImage } = await import('@tauri-apps/plugin-clipboard-manager');
       const img = await readImage();
+      const { width, height } = await img.size();
       const rgba = await img.rgba();
-      if (rgba.byteLength > 0) {
+      if (rgba.byteLength > 0 && width > 0 && height > 0) {
         event.preventDefault();
-        const blob = new Blob([rgba], { type: 'image/png' });
-        const file = new File([blob], 'clipboard-image.png', { type: 'image/png' });
+        // Convert RGBA pixels → PNG via OffscreenCanvas
+        const canvas = new OffscreenCanvas(width, height);
+        const ctx = canvas.getContext('2d')!;
+        const imageData = new ImageData(new Uint8ClampedArray(rgba), width, height);
+        ctx.putImageData(imageData, 0, 0);
+        const pngBlob = await canvas.convertToBlob({ type: 'image/png' });
+        const file = new File([pngBlob], 'clipboard-image.png', { type: 'image/png' });
         emit('add-attachments', [file]);
       }
-    } catch {
-      // No image in clipboard or plugin not available — let default paste handle it
+    } catch (err) {
+      console.warn('[vis] clipboard readImage fallback failed:', String(err));
+      console.warn('[vis] clipboardData.types:', event.clipboardData?.types);
+      console.warn('[vis] items:', items.map((i) => `${i.kind}:${i.type}`));
     }
   }
 }
