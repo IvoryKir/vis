@@ -130,15 +130,22 @@ function computeFallbackPosition(): Record<string, string> {
   if (!root.value) return {};
   const rect = root.value.getBoundingClientRect();
   const viewH = window.innerHeight;
+  const viewW = window.innerWidth;
   const spaceBelow = viewH - rect.bottom;
   const spaceAbove = rect.top;
-  // If more space above (or popup near bottom of screen), flip upward.
   const flipUp = spaceAbove > spaceBelow && spaceBelow < 300;
+  const ps = props.popupStyle as Record<string, unknown> | undefined;
   const style: Record<string, string> = {
     position: 'fixed',
-    left: `${rect.left}px`,
-    width: `${rect.width}px`,
   };
+  if (ps?.right !== undefined) {
+    style.right = `${viewW - rect.right}px`;
+  } else if (!ps || ps.left === undefined) {
+    style.left = `${rect.left}px`;
+  }
+  if (!ps || (ps.width === undefined && ps.minWidth === undefined)) {
+    style.minWidth = `${rect.width}px`;
+  }
   if (flipUp) {
     style.bottom = `${viewH - rect.top + 6}px`;
   } else {
@@ -494,7 +501,6 @@ defineExpose({ moveHighlight, selectHighlighted, updateSearch, clearHighlight })
   position: absolute;
   top: 100%;
   left: 0;
-  min-width: 100%;
   margin-top: 6px;
   max-width: calc(100vw - 16px);
   max-height: 60vh;

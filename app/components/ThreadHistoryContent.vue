@@ -154,18 +154,21 @@ function getCustomAnswer(entry: QuestionHistoryEntry, questionIndex: number): st
 
 function toolBadgeLabel(tool: string): string {
   switch (tool) {
-    case 'bash':
-      return 'SHELL';
-    case 'write':
-      return 'WRITE';
-    case 'edit':
-      return 'EDIT';
-    case 'multiedit':
-      return 'EDIT';
-    case 'apply_patch':
-      return 'PATCH';
-    default:
-      return tool.toUpperCase();
+    case 'bash': return 'SHELL';
+    case 'write': return 'WRITE';
+    case 'edit': return 'EDIT';
+    case 'multiedit': return 'EDIT';
+    case 'apply_patch': return 'PATCH';
+    case 'task': return 'SUBAGENT';
+    case 'read': return 'READ';
+    case 'glob': return 'GLOB';
+    case 'grep': return 'GREP';
+    case 'codesearch': return 'SEARCH';
+    case 'webfetch': return 'FETCH';
+    case 'websearch': return 'WEB';
+    case 'list': return 'LIST';
+    case 'shell': return 'TERMINAL';
+    default: return tool.toUpperCase();
   }
 }
 
@@ -210,9 +213,35 @@ function toolSummary(part: ToolPart): string {
         .filter(Boolean) as string[];
       return paths.length > 0 ? paths.join(', ') : 'patch';
     }
+    case 'task': {
+      const desc = typeof input?.description === 'string' ? input.description : '';
+      const prompt = typeof input?.prompt === 'string' ? input.prompt.slice(0, 80) : '';
+      return desc || prompt || 'subagent task';
+    }
+    case 'read': {
+      const path = typeof input?.filePath === 'string' ? input.filePath : '';
+      return path || 'read';
+    }
+    case 'glob':
+    case 'list': {
+      const pattern = typeof input?.pattern === 'string' ? input.pattern : '';
+      return pattern || part.tool;
+    }
+    case 'grep':
+    case 'codesearch': {
+      const pattern = typeof input?.pattern === 'string' ? input.pattern : '';
+      return pattern || 'search';
+    }
+    case 'webfetch': {
+      const url = typeof input?.url === 'string' ? input.url : '';
+      return url ? url.slice(0, 80) : 'fetch';
+    }
+    case 'websearch': {
+      const query = typeof input?.query === 'string' ? input.query : '';
+      return query || 'web search';
+    }
     default:
       return part.tool;
-  }
 }
 
 function toolStatusLabel(part: ToolPart): string {
@@ -221,17 +250,14 @@ function toolStatusLabel(part: ToolPart): string {
 
 function toolHeaderColor(tool: string): string {
   switch (tool) {
-    case 'bash':
-      return 'var(--color-purple)';
-    case 'edit':
-    case 'multiedit':
-    case 'apply_patch':
-      return 'var(--color-orange)';
-    case 'write':
-      return 'var(--color-orange)';
-    default:
-      return 'var(--text-faint)';
+    case 'bash': case 'shell': return 'var(--color-purple)';
+    case 'edit': case 'multiedit': case 'apply_patch': case 'write': return 'var(--color-orange)';
+    case 'task': return 'var(--color-info)';
+    case 'read': case 'glob': case 'grep': case 'codesearch': case 'list': return 'var(--color-success)';
+    case 'webfetch': case 'websearch': return 'var(--accent-primary)';
+    default: return 'var(--text-faint)';
   }
+}
 }
 
 function formatMessageTime(value?: number) {

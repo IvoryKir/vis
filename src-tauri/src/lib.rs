@@ -511,7 +511,8 @@ pub fn run() {
             app.add_capability(
                 CapabilityBuilder::new("localhost-remote")
                     .remote(url.to_string())
-                    .window("main"),
+                    .window("main")
+                    .permission("clipboard-manager:allow-read-image"),
             )?;
 
             WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url.clone()))
