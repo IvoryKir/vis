@@ -369,174 +369,40 @@ import {
   storageSet,
   storageSetJSON,
 } from './utils/storageKeys';
+import {
+  FOLLOW_THRESHOLD_PX,
+  FILE_VIEWER_WINDOW_WIDTH,
+  FILE_VIEWER_WINDOW_HEIGHT,
+  TERM_COLUMNS,
+  TERM_ROWS,
+  TERM_LINE_HEIGHT,
+  TERM_TITLEBAR_HEIGHT_PX,
+  TERM_WINDOW_BORDER_PX,
+  TERM_INNER_PADDING_X_PX,
+  TERM_INNER_PADDING_Y_PX,
+  TERM_GUTTER_WIDTH_EM,
+  SHELL_LINGER_MS,
+  REASONING_CLOSE_DELAY_MS,
+  SUBAGENT_CLOSE_DELAY_MS,
+  ATTACHMENT_MIME_ALLOWLIST,
+  NAVIGABLE_MAX_SESSIONS,
+  DOUBLE_ESC_THRESHOLD,
+  DOUBLE_CTRL_G_THRESHOLD,
+  TOOL_WINDOW_HIDDEN,
+  TOOL_WINDOW_SUPPORTED,
+} from './constants';
+import {
+  COMMIT_SNAPSHOT_SCRIPT,
+  FILE_SNAPSHOT_SCRIPT,
+  buildWorktreeSnapshotScript,
+  type WorktreeSnapshotMode,
+} from './utils/gitScripts';
 
 const credentials = useCredentials();
 const launcherManaged = credentials.launcherManaged;
 const { suppressAutoWindows, fontFamilyCSS, fontSize: settingsFontSize } = useSettings();
-const FOLLOW_THRESHOLD_PX = 24;
-const FILE_VIEWER_WINDOW_WIDTH = 840;
-const FILE_VIEWER_WINDOW_HEIGHT = 520;
-const TERM_COLUMNS = 80;
-const TERM_ROWS = 25;
 const TERM_FONT_SIZE_PX = settingsFontSize.value;
-const TERM_LINE_HEIGHT = 1.1;
-const TERM_TITLEBAR_HEIGHT_PX = 22;
-const TERM_WINDOW_BORDER_PX = 2;
-const TERM_INNER_PADDING_X_PX = 4;
-const TERM_INNER_PADDING_Y_PX = 4;
-const TERM_GUTTER_WIDTH_EM = 3.2;
 const TERM_FONT_FAMILY = fontFamilyCSS.value;
-const SHELL_LINGER_MS = 1000;
-const COMMIT_SNAPSHOT_SCRIPT = [
-  'stty -opost -echo 2>/dev/null',
-  'export GIT_PAGER=cat',
-  'export GIT_TERMINAL_PROMPT=0',
-  'h=$1',
-  'printf "##TITLE\\t%s\\n" "$(git --no-pager log --format="%h %s" -1 "$h" 2>/dev/null)"',
-  'git diff-tree --no-commit-id -r --name-status --find-renames --find-copies --first-parent --root "$h" 2>/dev/null | while IFS="$(printf "\\t")" read -r st p1 p2; do',
-  '  code=${st%"${st#?}"}',
-  '  old=$p1',
-  '  new=$p1',
-  '  if [ "$code" = "R" ] || [ "$code" = "C" ]; then',
-  '    old=$p1',
-  '    new=$p2',
-  '  fi',
-  '  printf "##FILE\\t%s\\t%s\\n" "$st" "$new"',
-  '  printf "##BEFORE\\n"',
-  '  if [ "$code" != "A" ]; then',
-  '    git --no-pager show "$h^:$old" 2>/dev/null | base64 -w 76',
-  '  fi',
-  '  printf "##AFTER\\n"',
-  '  if [ "$code" != "D" ]; then',
-  '    git --no-pager show "$h:$new" 2>/dev/null | base64 -w 76',
-  '  fi',
-  'done',
-].join('\n');
-const FILE_SNAPSHOT_SCRIPT = [
-  'stty -opost -echo 2>/dev/null',
-  'export GIT_PAGER=cat',
-  'export GIT_TERMINAL_PROMPT=0',
-  'mode=$1',
-  'path=$2',
-  'printf "##BEFORE\\n"',
-  'if [ "$mode" = "staged" ]; then',
-  '  git --no-pager show "HEAD:$path" 2>/dev/null | base64 -w 76',
-  'else',
-  '  git --no-pager show ":$path" 2>/dev/null | base64 -w 76',
-  'fi',
-  'printf "##AFTER\\n"',
-  'if [ "$mode" = "staged" ]; then',
-  '  git --no-pager show ":$path" 2>/dev/null | base64 -w 76',
-  'else',
-  '  if [ -f "$path" ]; then',
-  '    base64 -w 76 < "$path"',
-  '  fi',
-  'fi',
-].join('\n');
-type WorktreeSnapshotMode = 'staged' | 'changes' | 'all';
-function buildWorktreeSnapshotScript(mode: WorktreeSnapshotMode): string {
-  const title =
-    mode === 'staged'
-      ? 'Staged changes'
-      : mode === 'changes'
-        ? 'Unstaged changes'
-        : 'Working tree (staged + changes)';
-  // Filter logic: which files to include based on mode
-  // x = index status (1st column), y = worktree status (2nd column)
-  let filterLines: string[];
-  if (mode === 'staged') {
-    // Only files with index changes (x != ' ' and x != '?')
-    filterLines = ['  [ "$x" = " " ] && continue', '  [ "$x" = "?" ] && continue'];
-  } else if (mode === 'changes') {
-    // Only files with worktree changes (y != ' ' and y != '?')
-    filterLines = ['  [ "$y" = " " ] && continue', '  [ "$y" = "?" ] && continue'];
-  } else {
-    // All: skip untracked only
-    filterLines = ['  [ "$x" = "?" ] && [ "$y" = "?" ] && continue'];
-  }
-  // Before/after source depends on mode
-  let beforeLines: string[];
-  let afterLines: string[];
-  if (mode === 'staged') {
-    // staged: HEAD -> index
-    beforeLines = [
-      '  printf "##BEFORE\\n"',
-      '  if [ "$code" != "A" ]; then',
-      '    git --no-pager show "HEAD:$old" 2>/dev/null | base64 -w 76',
-      '  fi',
-    ];
-    afterLines = [
-      '  printf "##AFTER\\n"',
-      '  if [ "$code" != "D" ]; then',
-      '    git --no-pager show ":$new" 2>/dev/null | base64 -w 76',
-      '  fi',
-    ];
-  } else if (mode === 'changes') {
-    // changes: index -> working tree
-    beforeLines = [
-      '  printf "##BEFORE\\n"',
-      '  if [ "$code" != "A" ]; then',
-      '    git --no-pager show ":$old" 2>/dev/null | base64 -w 76',
-      '  fi',
-    ];
-    afterLines = [
-      '  printf "##AFTER\\n"',
-      '  if [ "$code" != "D" ] && [ -f "$new" ]; then',
-      '    base64 -w 76 < "$new"',
-      '  fi',
-    ];
-  } else {
-    // all: HEAD -> working tree
-    beforeLines = [
-      '  printf "##BEFORE\\n"',
-      '  if [ "$code" != "A" ]; then',
-      '    git --no-pager show "HEAD:$old" 2>/dev/null | base64 -w 76',
-      '  fi',
-    ];
-    afterLines = [
-      '  printf "##AFTER\\n"',
-      '  if [ "$code" != "D" ] && [ -f "$new" ]; then',
-      '    base64 -w 76 < "$new"',
-      '  fi',
-    ];
-  }
-  return [
-    'stty -opost -echo 2>/dev/null',
-    'export GIT_PAGER=cat',
-    'export GIT_TERMINAL_PROMPT=0',
-    `printf "##TITLE\\t${title}\\n"`,
-    'git --no-pager status --porcelain=v1 2>/dev/null | while IFS= read -r line; do',
-    '  [ -z "$line" ] && continue',
-    '  x=${line%"${line#?}"}',
-    '  rest=${line#?}',
-    '  y=${rest%"${rest#?}"}',
-    ...filterLines,
-    '  path=${line#???}',
-    '  old=$path',
-    '  new=$path',
-    '  code=M',
-    '  if [ "$x" = "D" ] || [ "$y" = "D" ]; then',
-    '    code=D',
-    '  elif [ "$x" = "A" ]; then',
-    '    code=A',
-    '  elif [ "$x" = "R" ] || [ "$y" = "R" ]; then',
-    '    code=R',
-    '    old=${path%% -> *}',
-    '    new=${path#* -> }',
-    '  elif [ "$x" = "C" ] || [ "$y" = "C" ]; then',
-    '    code=C',
-    '    old=${path%% -> *}',
-    '    new=${path#* -> }',
-    '  fi',
-    '  printf "##FILE\\t%s\\t%s\\n" "$code" "$new"',
-    ...beforeLines,
-    ...afterLines,
-    'done',
-  ].join('\n');
-}
-const REASONING_CLOSE_DELAY_MS = 3000;
-const SUBAGENT_CLOSE_DELAY_MS = 3000;
-const ATTACHMENT_MIME_ALLOWLIST = new Set(['image/png', 'image/jpeg', 'image/gif', 'image/webp']);
 
 type TodoPanelSession = {
   sessionId: string;
@@ -1111,7 +977,6 @@ const topPanelTreeData = computed<TopPanelWorktree[]>(() => {
 
 // Navigable session tree: mirrors TopPanel's displayedTree (no-search mode).
 // Filters archived sessions, truncates per-sandbox, and drops empty worktrees.
-const NAVIGABLE_MAX_SESSIONS = 5;
 const navigableTree = computed(() => {
   return topPanelTreeData.value
     .map((worktree) => ({
@@ -3840,8 +3705,6 @@ function switchProjectByDirection(delta: number) {
 
 let lastEscTime = 0;
 let lastCtrlGTime = 0;
-const DOUBLE_ESC_THRESHOLD = 500;
-const DOUBLE_CTRL_G_THRESHOLD = 500;
 
 function handleGlobalKeydown(event: KeyboardEvent) {
   // Ctrl-A: select all content in focused div (floating window body)
@@ -4076,7 +3939,7 @@ async function reloadSelectedSessionState(forceRefresh = false) {
   // updates land in the right place (even when it's a background tab).
   if (sessionId) {
     const sessionStore = useSessionMessages(sessionId);
-    sessionStore.bindScope(mainSessionScope);
+    sessionStore.bindScope(getFixedSessionScope(sessionId));
   }
 
   // Scroll / follow state is per-view, reset on every switch.
@@ -4259,6 +4122,18 @@ const deltaAccumulator = useDeltaAccumulator();
 deltaAccumulator.listen(ge);
 const sessionScope = ge.session(selectedSessionId, sessionParentRecord);
 const mainSessionScope = ge.mainSession(selectedSessionId);
+
+// Per-session fixed scopes: each store gets a scope locked to its own sessionId,
+// so SSE events for session A never leak into session B's store.
+const perSessionScopes = new Map<string, ReturnType<typeof ge.mainSession>>();
+function getFixedSessionScope(sessionId: string) {
+  let scope = perSessionScopes.get(sessionId);
+  if (!scope) {
+    scope = ge.mainSession(ref(sessionId));
+    perSessionScopes.set(sessionId, scope);
+  }
+  return scope;
+}
 const msg = useMessages();
 // NOTE: msg.bindScope is NOT called here — it's done per-session in
 // reloadSelectedSessionState so that each per-session store receives
@@ -4266,7 +4141,9 @@ const msg = useMessages();
 reasoning.bindScope(sessionScope);
 subagentWindows.bindScope(sessionScope);
 
-watch(selectedSessionId, () => reloadSelectedSessionState(), { immediate: true });
+// @ts-expect-error watch passes (newSessionId, oldSessionId) — truthy string
+// acts as forceRefresh on session switch. This is the original intentional design.
+watch(selectedSessionId, reloadSelectedSessionState, { immediate: true });
 
 watch([selectedProjectId, selectedSessionId], syncActiveSelectionToWorker, { immediate: true });
 
@@ -4428,30 +4305,6 @@ function renderEditDiffHtml(params: {
     });
 }
 
-const TOOL_WINDOW_HIDDEN = new Set([
-  'question',
-  'todoread',
-  'todowrite',
-  'lsp',
-  'plan_enter',
-  'plan_exit',
-  'task',
-]);
-const TOOL_WINDOW_SUPPORTED = new Set([
-  'apply_patch',
-  'bash',
-  'codesearch',
-  'edit',
-  'glob',
-  'grep',
-  'list',
-  'multiedit',
-  'read',
-  'task',
-  'webfetch',
-  'websearch',
-  'write',
-]);
 
 function shouldRenderToolWindow(tool: string) {
   return !TOOL_WINDOW_HIDDEN.has(tool) && TOOL_WINDOW_SUPPORTED.has(tool);
